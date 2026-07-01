@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <i class="fas fa-store"></i>
+      <span>StoreAdmin</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-link active" data-section="dashboard">
+        <i class="fas fa-chart-pie"></i> Dashboard
+      </a>
+      <a href="#" class="nav-link" data-section="products">
+        <i class="fas fa-box"></i> Products
+      </a>
+      <a href="#" class="nav-link" data-section="orders">
+        <i class="fas fa-shopping-cart"></i> Orders
+      </a>
+      <a href="#" class="nav-link" data-section="users">
+        <i class="fas fa-users"></i> Users
+      </a>
+      <a href="#" class="nav-link" data-section="settings">
+        <i class="fas fa-cog"></i> Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="adminLogout">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <h2 id="pageTitle">Dashboard</h2>
+      </div>
+      <div class="topbar-right">
+        <span class="admin-badge"><i class="fas fa-shield-alt"></i> Admin</span>
+        <span class="admin-name">Administrator</span>
+      </div>
+    </header>
+
+    <!-- ===== DASHBOARD ===== -->
+    <section id="section-dashboard" class="section active">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-box"></i></div><div><h3 id="statProducts">0</h3><p>Total Products</p></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-shopping-cart"></i></div><div><h3 id="statOrders">0</h3><p>Total Orders</p></div></div>
+        <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-users"></i></div><div><h3 id="statUsers">0</h3><p>Total Users</p></div></div>
+        <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-dollar-sign"></i></div><div><h3 id="statRevenue">$0</h3><p>Total Revenue</p></div></div>
+      </div>
+      <div class="dashboard-charts">
+        <div class="chart-card"><h3>Recent Orders</h3><div id="recentOrdersList" class="recent-list"><p class="empty-msg">No orders yet</p></div></div>
+        <div class="chart-card"><h3>Top Products</h3><div id="topProductsList" class="recent-list"><p class="empty-msg">No products yet</p></div></div>
+      </div>
+    </section>
+
+    <!-- ===== PRODUCTS ===== -->
+    <section id="section-products" class="section">
+      <div class="section-header">
+        <h3><i class="fas fa-box"></i> Manage Products</h3>
+        <button class="btn btn-primary" id="addProductBtn"><i class="fas fa-plus"></i> Add Product</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="productsTable">
+          <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+          <tbody id="productsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== ORDERS ===== -->
+    <section id="section-orders" class="section">
+      <div class="section-header"><h3><i class="fas fa-shopping-cart"></i> Manage Orders</h3></div>
+      <div class="table-wrap">
+        <table class="data-table" id="ordersTable">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Products</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== USERS ===== -->
+    <section id="section-users" class="section">
+      <div class="section-header"><h3><i class="fas fa-users"></i> Manage Users</h3></div>
+      <div class="table-wrap">
+        <table class="data-table" id="usersTable">
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== SETTINGS ===== -->
+    <section id="section-settings" class="section">
+      <div class="section-header"><h3><i class="fas fa-cog"></i> Settings</h3></div>
+      <div class="settings-card">
+        <h4>Store Information</h4>
+        <div class="form-group"><label>Store Name</label><input type="text" id="storeName" value="My Awesome Store" /></div>
+        <div class="form-group"><label>Store Email</label><input type="email" id="storeEmail" value="admin@store.com" /></div>
+        <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+      </div>
+      <div class="settings-card" style="margin-top:20px;">
+        <h4>Danger Zone</h4>
+        <button class="btn btn-danger" id="resetDataBtn"><i class="fas fa-trash"></i> Reset All Data</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== PRODUCT MODAL ===== -->
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <div class="modal-header"><h3 id="productModalTitle">Add Product</h3><button class="modal-close" id="productModalClose">&times;</button></div>
+      <div class="modal-body">
+        <form id="productForm">
+          <input type="hidden" id="productId" />
+          <div class="form-group"><label>Product Name</label><input type="text" id="pName" required /></div>
+          <div class="form-group"><label>Description</label><textarea id="pDesc" rows="3"></textarea></div>
+          <div class="form-row">
+            <div class="form-group"><label>Price ($)</label><input type="number" id="pPrice" step="0.01" required /></div>
+            <div class="form-group"><label>Stock</label><input type="number" id="pStock" required /></div>
+          </div>
+          <div class="form-group"><label>Category</label>
+            <select id="pCategory"><option value="Electronics">Electronics</option><option value="Clothing">Clothing</option><option value="Books">Books</option><option value="Home">Home</option><option value="Beauty">Beauty</option><option value="Toys">Toys</option><option value="Other">Other</option></select>
+          </div>
+          <div class="form-group"><label>Image URL</label><input type="text" id="pImage" placeholder="https://via.placeholder.com/200" /></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" id="productModalCancel">Cancel</button><button class="btn btn-primary" id="productModalSave">Save Product</button></div>
+    </div>
+  </div>
+
+  <!-- ===== ORDER DETAIL MODAL ===== -->
+  <div class="modal" id="orderModal">
+    <div class="modal-content" style="max-width:600px;">
+      <div class="modal-header"><h3>Order Details</h3><button class="modal-close" id="orderModalClose">&times;</button></div>
+      <div class="modal-body" id="orderDetailBody"></div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
