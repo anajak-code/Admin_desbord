@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Manage Products</title>
+    <title>Admin Dashboard</title>
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -22,7 +23,7 @@
             </div>
             <button class="btn btn-primary" onclick="login()"><i class="fas fa-sign-in-alt"></i> Login</button>
             <p class="hint">Default: admin / 123456</p>
-            <p class="link"><a href="/products"><i class="fas fa-store"></i> Go to User Dashboard</a></p>
+            <p class="link"><a href="/products"><i class="fas fa-store"></i> Go to User Shop</a></p>
         </div>
     </div>
 
@@ -32,7 +33,7 @@
             <div class="header-content">
                 <h1><i class="fas fa-cogs"></i> Admin Dashboard</h1>
                 <div class="header-actions">
-                    <a href="/products" class="btn btn-info"><i class="fas fa-store"></i> User View</a>
+                    <a href="/products" class="btn btn-info"><i class="fas fa-eye"></i> View Shop</a>
                     <button class="btn btn-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 </div>
             </div>
@@ -40,7 +41,7 @@
                 <button class="nav-btn active" data-section="products"><i class="fas fa-box"></i> Products</button>
                 <button class="nav-btn" data-section="orders"><i class="fas fa-shopping-cart"></i> Orders</button>
                 <button class="nav-btn" data-section="users"><i class="fas fa-users"></i> Users</button>
-                <button class="nav-btn" data-section="stats"><i class="fas fa-chart-bar"></i> Statistics</button>
+                <button class="nav-btn" data-section="stats"><i class="fas fa-chart-bar"></i> Stats</button>
             </nav>
         </header>
 
@@ -49,7 +50,10 @@
             <section id="productsSection" class="section active">
                 <div class="section-header">
                     <h2><i class="fas fa-box-open"></i> Product Management</h2>
-                    <button class="btn btn-success" onclick="showAddProductModal()"><i class="fas fa-plus"></i> Add Product</button>
+                    <!-- Button នេះនឹងដំណើរការដោយសារ window.showAddProductModal -->
+                    <button class="btn btn-success" onclick="showAddProductModal()">
+                        <i class="fas fa-plus-circle"></i> Add Product
+                    </button>
                 </div>
                 <div class="table-wrapper">
                     <table>
@@ -70,12 +74,12 @@
 
             <!-- Orders Section -->
             <section id="ordersSection" class="section">
-                <h2><i class="fas fa-shopping-bag"></i> Orders List</h2>
+                <h2><i class="fas fa-receipt"></i> Orders List</h2>
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
-                                <th>Order ID</th>
+                                <th>ID</th>
                                 <th>User</th>
                                 <th>Product</th>
                                 <th>Qty</th>
@@ -101,7 +105,6 @@
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Registered</th>
-                                <th>Orders</th>
                             </tr>
                         </thead>
                         <tbody id="usersTable"></tbody>
@@ -121,7 +124,7 @@
     <div id="productModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle"><i class="fas fa-plus-circle"></i> Add Product</h3>
+                <h3 id="modalTitle"><i class="fas fa-plus"></i> Add New Product</h3>
                 <span class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></span>
             </div>
             <div class="form-group">
@@ -137,17 +140,20 @@
                 <input type="number" id="productStock">
             </div>
             <div class="form-group">
-                <label><i class="fas fa-image"></i> Image URL (optional)</label>
+                <label><i class="fas fa-image"></i> Image URL</label>
                 <input type="text" id="productImage" placeholder="https://...">
             </div>
             <div class="form-group">
                 <label><i class="fas fa-align-left"></i> Description</label>
-                <textarea id="productDescription" rows="4"></textarea>
+                <textarea id="productDescription" rows="3"></textarea>
             </div>
-            <button class="btn btn-primary" onclick="saveProduct()"><i class="fas fa-save"></i> Save Product</button>
+            <button class="btn btn-primary" onclick="saveProduct()">
+                <i class="fas fa-save"></i> Save Product
+            </button>
         </div>
     </div>
 
+    <!-- Script Type Module សំខាន់សម្រាប់ Import Firebase -->
     <script type="module" src="script.js"></script>
 </body>
-                                </html>
+</html>
