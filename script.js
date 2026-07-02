@@ -1,7 +1,8 @@
+// Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, get, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, get, update, remove, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// ✅ Firebase Config របស់អ្នក
+// Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyC42F7V4_h1VmAtAWuoFL8TxW-b3ym-524",
     authDomain: "ahnajakcode.firebaseapp.com",
@@ -12,164 +13,245 @@ const firebaseConfig = {
     appId: "1:540215503567:web:c05f16eb75d1da6c3da5ba"
 };
 
+// Initialize
 const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+const db = getDatabase(app);
 
+console.log('✅ Firebase Connected!');
+
+// Global variables
 let editingProductId = null;
 
-// ========== LOGIN & LOGOUT ==========
-window.login = function() {
-    const u = document.getElementById('username').value;
-    const p = document.getElementById('password').value;
-    if(u === 'admin' && p === '123456') {
+// ========== LOGIN ==========
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (username === 'admin' && password === '123456') {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
-        loadAllData();
-        listenForChanges(); // ✅ ចាប់ផតើមស្តាប់ការផ្លាស់ប្តូរពី User
+        loadProducts();
+        loadOrders();
+        setupRealTimeListener();
     } else {
-        alert('Invalid credentials!');
+        alert('Wrong username or password!');
     }
 }
 
-window.logout = function() {
+function logout() {
     location.reload();
-}
-
-// ========== REAL-TIME SYNC (សំខាន់!) ==========
-function listenForChanges() {
-    console.log("🔄 Listening for changes from User Dashboard...");
-    
-    // ស្តាប់ Products (ពេល User ទិញ Stock នឹងថយ)
-    onValue(ref(database, 'products'), (snap) => {
-        loadProductsTable();
-        loadStats();
-    });
-
-    // ស្ាប់ Orders (ពេល User Checkout Order នឹងចូលមក)
-    onValue(ref(database, 'orders'), (snap) => {
-        loadOrdersTable();
-        loadStats();
-    });
 }
 
 // ========== NAVIGATION ==========
 document.addEventListener('DOMContentLoaded', () => {
+    // Navigation buttons
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', function() {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            this.classList.add('active');
+            
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(btn.dataset.section + 'Section').classList.add('active');
+            document.getElementById(this.dataset.section + 'Section').classList.add('active');
         });
+    });
+    
+    // Modal close button
+    document.querySelector('.close-btn').addEventListener('click', closeModal);
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('productModal');
+        if (e.target === modal) {
+            closeModal();
+        }
     });
 });
 
-// ========== PRODUCTS FUNCTIONS ==========
-function loadProductsTable() {
-    get(ref(database, 'products')).then(snap => {
-        const data = snap.val() || {};
-        const arr = Object.entries(data).map(([id, val]) => ({id, ...val}));
+// ========== PRODUCTS ==========
+function loadProducts() {
+    const productsRef = ref(db, 'products');
+    
+    onValue(productsRef, (snapshot) => {
+        const data = snapshot.val();
         const tbody = document.getElementById('productsTable');
         
-        if(arr.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No products found</td></tr>';
+        if (!data) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No products yet. Click "Add Product" to create one!</td></tr>';
             return;
         }
-
-        tbody.innerHTML = arr.map(p => `
+        
+        const products = Object.entries(data).map(([id, value]) => ({ id, ...value }));
+        
+        tbody.innerHTML = products.map(p => `
             <tr>
                 <td>#${p.id}</td>
-                <td><img src="${p.image || 'https://via.placeholder.com/50'}" width="40"></td>
+                <td><img src="${p.image || 'https://via.placeholder.com/50'}" alt="${p.name}" style="width:50px;height:50px;object-fit:cover;border-radius:5px;"></td>
                 <td>${p.name}</td>
                 <td>$${parseFloat(p.price).toFixed(2)}</td>
                 <td>${p.stock}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-warning btn-sm" onclick="editProduct('${p.id}')">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">Delete</button>
                 </td>
             </tr>
         `).join('');
     });
 }
 
-// ✅ ដំណោះស្រាយ Button Add Product (Assign to window)
-window.showAddProductModal = function() {
+// ✅ OPEN MODAL - ដំណោះស្រាយសំខាន់!
+function showAddProductModal() {
+    console.log('🔵 Opening Add Product Modal...');
     editingProductId = null;
-    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Add New Product';
+    
+    document.getElementById('modalTitle').textContent = 'Add New Product';
     document.getElementById('productName').value = '';
     document.getElementById('productPrice').value = '';
     document.getElementById('productStock').value = '';
     document.getElementById('productImage').value = '';
     document.getElementById('productDescription').value = '';
+    
     document.getElementById('productModal').classList.add('active');
+    console.log('✅ Modal opened!');
 }
 
-window.editProduct = async function(id) {
-    const snap = await get(ref(database, 'products/' + id));
-    const p = snap.val();
-    if(!p) return;
+// EDIT PRODUCT
+async function editProduct(id) {
+    console.log('✏️ Editing product:', id);
+    
+    const productRef = ref(db, 'products/' + id);
+    const snapshot = await get(productRef);
+    const product = snapshot.val();
+    
+    if (!product) {
+        alert('Product not found!');
+        return;
+    }
     
     editingProductId = id;
-    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Product';
-    document.getElementById('productName').value = p.name;
-    document.getElementById('productPrice').value = p.price;
-    document.getElementById('productStock').value = p.stock;
-    document.getElementById('productImage').value = p.image || '';
-    document.getElementById('productDescription').value = p.description || '';
+    document.getElementById('modalTitle').textContent = 'Edit Product';
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productPrice').value = product.price;
+    document.getElementById('productStock').value = product.stock;
+    document.getElementById('productImage').value = product.image || '';
+    document.getElementById('productDescription').value = product.description || '';
+    
     document.getElementById('productModal').classList.add('active');
 }
 
-window.saveProduct = async function() {
+// ✅ SAVE PRODUCT - ដំណោះស្រាយសំខាន់!
+async function saveProduct() {
+    console.log('💾 Saving product...');
+    
     const name = document.getElementById('productName').value.trim();
     const price = parseFloat(document.getElementById('productPrice').value);
     const stock = parseInt(document.getElementById('productStock').value);
     const image = document.getElementById('productImage').value.trim();
-    const desc = document.getElementById('productDescription').value.trim();
-
-    if(!name || isNaN(price) || isNaN(stock)) return alert('Please fill required fields!');
-
+    const description = document.getElementById('productDescription').value.trim();
+    
+    // Validation
+    if (!name) {
+        alert('Please enter product name!');
+        return;
+    }
+    
+    if (isNaN(price) || price <= 0) {
+        alert('Please enter a valid price!');
+        return;
+    }
+    
+    if (isNaN(stock) || stock < 0) {
+        alert('Please enter a valid stock quantity!');
+        return;
+    }
+    
     try {
-        if(editingProductId) {
-            await update(ref(database, 'products/' + editingProductId), { name, price, stock, image, description: desc });
+        if (editingProductId) {
+            // Update existing product
+            console.log('🔄 Updating product:', editingProductId);
+            const productRef = ref(db, 'products/' + editingProductId);
+            await update(productRef, {
+                name: name,
+                price: price,
+                stock: stock,
+                image: image,
+                description: description
+            });
+            console.log('✅ Product updated!');
         } else {
-            const snap = await get(ref(database, 'products'));
-            const current = snap.val() || {};
-            const newId = Object.keys(current).length > 0 ? Math.max(...Object.keys(current).map(k=>parseInt(k))) + 1 : 1;
+            // Add new product
+            console.log('➕ Creating new product...');
             
-            // ✅ ដាក់ទិន្នន័យចូល Firebase -> User នឹងឃើញភ្ាមៗ
-            await set(ref(database, 'products/' + newId), { name, price, stock, image, description: desc });
+            const productsRef = ref(db, 'products');
+            const snapshot = await get(productsRef);
+            const products = snapshot.val() || {};
+            
+            // Generate new ID
+            const newId = Object.keys(products).length > 0 
+                ? Math.max(...Object.keys(products).map(k => parseInt(k))) + 1 
+                : 1;
+            
+            const newProduct = {
+                id: newId,
+                name: name,
+                price: price,
+                stock: stock,
+                image: image,
+                description: description,
+                createdAt: new Date().toISOString()
+            };
+            
+            await set(ref(db, 'products/' + newId), newProduct);
+            console.log('✅ Product created with ID:', newId);
         }
-        closeModal();
-        alert('✅ Saved! Check User Dashboard (/products) now.');
-    } catch(e) {
-        console.error(e);
-        alert('Error saving product');
-    }
-}
-
-window.deleteProduct = async function(id) {
-    if(confirm('Delete this product?')) {
-        await remove(ref(database, 'products/' + id));
-    }
-}
-
-window.closeModal = function() {
-    document.getElementById('productModal').classList.remove('active');
-}
-
-// ========== ORDERS & STATS ==========
-function loadOrdersTable() {
-    get(ref(database, 'orders')).then(snap => {
-        const data = snap.val() || {};
-        const arr = Object.entries(data).map(([id, val]) => ({id, ...val})).reverse(); // ថ្មីបង្ហាញមុន
         
+        // Close modal and show success
+        closeModal();
+        alert('✅ Product saved successfully! Check user dashboard at /products');
+        
+    } catch (error) {
+        console.error('❌ Error saving product:', error);
+        alert('Error saving product: ' + error.message);
+    }
+}
+
+// DELETE PRODUCT
+async function deleteProduct(id) {
+    if (!confirm('Are you sure you want to delete this product?')) {
+        return;
+    }
+    
+    try {
+        console.log('🗑️ Deleting product:', id);
+        await remove(ref(db, 'products/' + id));
+        alert('Product deleted!');
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Error deleting product');
+    }
+}
+
+// CLOSE MODAL
+function closeModal() {
+    document.getElementById('productModal').classList.remove('active');
+    editingProductId = null;
+}
+
+// ========== ORDERS ==========
+function loadOrders() {
+    const ordersRef = ref(db, 'orders');
+    
+    onValue(ordersRef, (snapshot) => {
+        const data = snapshot.val();
         const tbody = document.getElementById('ordersTable');
-        if(arr.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">No orders yet</td></tr>';
+        
+        if (!data) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">No orders yet</td></tr>';
             return;
         }
-
-        tbody.innerHTML = arr.map(o => `
+        
+        const orders = Object.entries(data).map(([id, value]) => ({ id, ...value })).reverse();
+        
+        tbody.innerHTML = orders.map(o => `
             <tr>
                 <td>#${o.id}</td>
                 <td>${o.userName}</td>
@@ -177,12 +259,12 @@ function loadOrdersTable() {
                 <td>${o.quantity}</td>
                 <td>$${parseFloat(o.total).toFixed(2)}</td>
                 <td>${o.date}</td>
-                <td><span class="badge ${o.status}">${o.status}</span></td>
+                <td><span class="status status-${o.status.toLowerCase()}">${o.status}</span></td>
                 <td>
-                    <select onchange="updateStatus('${o.id}', this.value)" class="status-select">
-                        <option value="Pending" ${o.status=='Pending'?'selected':''}>Pending</option>
-                        <option value="Completed" ${o.status=='Completed'?'selected':''}>Completed</option>
-                        <option value="Cancelled" ${o.status=='Cancelled'?'selected':''}>Cancelled</option>
+                    <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding:5px;border-radius:5px;">
+                        <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="Completed" ${o.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                        <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                     </select>
                 </td>
             </tr>
@@ -190,26 +272,78 @@ function loadOrdersTable() {
     });
 }
 
-window.updateStatus = function(id, status) {
-    update(ref(database, 'orders/' + id), { status });
+// UPDATE ORDER STATUS
+async function updateOrderStatus(id, status) {
+    try {
+        await update(ref(db, 'orders/' + id), { status: status });
+        console.log('Order status updated to:', status);
+    } catch (error) {
+        console.error('Error updating order status:', error);
+    }
 }
 
-function loadStats() {
-    Promise.all([get(ref(database, 'products')), get(ref(database, 'orders'))]).then(([pSnap, oSnap]) => {
-        const products = Object.keys(pSnap.val() || {}).length;
-        const orders = Object.values(oSnap.val() || {});
-        const revenue = orders.filter(o=>o.status==='Completed').reduce((s,o)=>s+parseFloat(o.total),0);
-        
-        document.getElementById('statsGrid').innerHTML = `
-            <div class="stat-card"><h3><i class="fas fa-box"></i> Products</h3><div class="val">${products}</div></div>
-            <div class="stat-card green"><h3><i class="fas fa-dollar-sign"></i> Revenue</h3><div class="val">$${revenue.toFixed(2)}</div></div>
-            <div class="stat-card blue"><h3><i class="fas fa-shopping-bag"></i> Orders</h3><div class="val">${orders.length}</div></div>
-        `;
+// ========== REAL-TIME LISTENERS ==========
+function setupRealTimeListener() {
+    console.log('🔄 Setting up real-time listeners...');
+    
+    // Listen for products changes
+    onValue(ref(db, 'products'), (snapshot) => {
+        console.log('📦 Products updated in database');
+        // Auto-refresh handled by loadProducts()
+    });
+    
+    // Listen for orders changes
+    onValue(ref(db, 'orders'), (snapshot) => {
+        console.log('🛒 Orders updated in database');
+        // Auto-refresh handled by loadOrders()
     });
 }
 
-function loadAllData() {
-    loadProductsTable();
-    loadOrdersTable();
-    loadStats();
-            }
+// ========== STATS ==========
+function loadStats() {
+    const productsRef = ref(db, 'products');
+    const ordersRef = ref(db, 'orders');
+    
+    Promise.all([get(productsRef), get(ordersRef)]).then(([productsSnap, ordersSnap]) => {
+        const products = productsSnap.val() || {};
+        const orders = ordersSnap.val() || {};
+        
+        const totalProducts = Object.keys(products).length;
+        const totalOrders = Object.keys(orders).length;
+        const totalRevenue = Object.values(orders)
+            .filter(o => o.status === 'Completed')
+            .reduce((sum, o) => sum + parseFloat(o.total), 0);
+        
+        document.getElementById('statsGrid').innerHTML = `
+            <div class="stat-card">
+                <h3><i class="fas fa-box"></i> Total Products</h3>
+                <div class="value">${totalProducts}</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                <h3><i class="fas fa-dollar-sign"></i> Total Revenue</h3>
+                <div class="value">$${totalRevenue.toFixed(2)}</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+                <h3><i class="fas fa-shopping-cart"></i> Total Orders</h3>
+                <div class="value">${totalOrders}</div>
+            </div>
+        `;
+    }).catch(error => {
+        console.error('Error loading stats:', error);
+    });
+}
+
+// ========== MAKE FUNCTIONS GLOBAL ==========
+// ដំណោះស្រាយសំខាន់បំផុត! ធ្វើអោយ function អាចប្រើពី HTML បាន
+window.login = login;
+window.logout = logout;
+window.showAddProductModal = showAddProductModal;
+window.saveProduct = saveProduct;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+window.closeModal = closeModal;
+window.updateOrderStatus = updateOrderStatus;
+window.loadStats = loadStats;
+
+console.log('✅ Admin script loaded successfully!');
+console.log('📝 Functions available:', Object.keys(window).filter(k => typeof window[k] === 'function').filter(k => !k.startsWith('_')).join(', '));
