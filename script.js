@@ -1,37 +1,24 @@
-// Initialize default data
-function initData() {
-    if (!localStorage.getItem('products')) {
-        const defaultProducts = [
-            { id: 1, name: 'iPhone 15 Pro', price: 999, stock: 50, image: 'https://via.placeholder.com/150/667eea/ffffff?text=iPhone', description: 'Latest iPhone with A17 Pro chip and titanium design' },
-            { id: 2, name: 'Samsung Galaxy S24', price: 899, stock: 30, image: 'https://via.placeholder.com/150/48bb78/ffffff?text=Galaxy', description: 'Premium Android with AI features' },
-            { id: 3, name: 'MacBook Pro M3', price: 1999, stock: 20, image: 'https://via.placeholder.com/150/ed8936/ffffff?text=MacBook', description: 'Powerful laptop with M3 chip' },
-            { id: 4, name: 'Sony WH-1000XM5', price: 399, stock: 40, image: 'https://via.placeholder.com/150/f56565/ffffff?text=Sony', description: 'Premium noise-cancelling headphones' }
-        ];
-        localStorage.setItem('products', JSON.stringify(defaultProducts));
-    }
-    
-    if (!localStorage.getItem('orders')) {
-        const defaultOrders = [
-            { id: 1001, userId: 1, userName: 'John Doe', productId: 1, productName: 'iPhone 15 Pro', quantity: 2, total: 1998, date: '2026-06-28', status: 'Completed' },
-            { id: 1002, userId: 2, userName: 'Jane Smith', productId: 2, productName: 'Samsung Galaxy S24', quantity: 1, total: 899, date: '2026-07-01', status: 'Pending' }
-        ];
-        localStorage.setItem('orders', JSON.stringify(defaultOrders));
-    }
-    
-    if (!localStorage.getItem('users')) {
-        const defaultUsers = [
-            { id: 1, name: 'John Doe', email: 'john@example.com', registeredDate: '2026-01-15' },
-            { id: 2, name: 'Jane Smith', email: 'jane@example.com', registeredDate: '2026-02-20' },
-            { id: 3, name: 'Bob Wilson', email: 'bob@example.com', registeredDate: '2026-03-10' }
-        ];
-        localStorage.setItem('users', JSON.stringify(defaultUsers));
-    }
-}
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, get, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyC42F7V4_h1VmAtAWuoFL8TxW-b3ym-524",
+    authDomain: "ahnajakcode.firebaseapp.com",
+    databaseURL: "https://ahnajakcode-default-rtdb.firebaseio.com",
+    projectId: "ahnajakcode",
+    storageBucket: "ahnajakcode.firebasestorage.app",
+    messagingSenderId: "540215503567",
+    appId: "1:540215503567:web:c05f16eb75d1da6c3da5ba"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+console.log('✅ Firebase initialized!');
 
 let editingProductId = null;
 
-// Login
-function login() {
+window.login = function() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     
@@ -39,22 +26,42 @@ function login() {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         loadAllData();
+        listenForChanges();
     } else {
         alert('Invalid credentials! Use: admin / 123456');
     }
 }
 
-function logout() {
+window.logout = function() {
     document.getElementById('loginPage').style.display = 'flex';
     document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
 }
 
-// Navigation
-document.addEventListener('DOMContentLoaded', () => {
-    initData();
+function listenForChanges() {
+    console.log('🔄 Listening for real-time changes...');
     
+    const productsRef = ref(database, 'products');
+    onValue(productsRef, (snapshot) => {
+        console.log('📦 Products updated');
+        loadProductsTable();
+        loadStats();
+    });
+    
+    const ordersRef = ref(database, 'orders');
+    onValue(ordersRef, (snapshot) => {
+        console.log(' Orders updated');
+        loadOrdersTable();
+        loadStats();
+    });
+    
+    const usersRef = ref(database, 'users');
+    onValue(usersRef, (snapshot) => {
+        console.log('👥 Users updated');
+        loadUsersTable();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -62,8 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(btn.dataset.section + 'Section').classList.add('active');
-            
-            loadAllData();
         });
     });
 });
@@ -75,32 +80,41 @@ function loadAllData() {
     loadStats();
 }
 
-// Products
 function loadProductsTable() {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const tbody = document.getElementById('productsTable');
-    
-    if (products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No products yet</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = products.map(p => `
-        <tr>
-            <td>#${p.id}</td>
-            <td><img src="${p.image || 'https://via.placeholder.com/50'}" alt="${p.name}"></td>
-            <td>${p.name}</td>
-            <td>$${p.price.toFixed(2)}</td>
-            <td>${p.stock}</td>
-            <td>
-                <button class="btn btn-warning btn-sm" onclick="editProduct(${p.id})">Edit</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">Delete</button>
-            </td>
-        </tr>
-    `).join('');
+    const productsRef = ref(database, 'products');
+    get(productsRef).then((snapshot) => {
+        const products = snapshot.val() || {};
+        const productsArray = Object.entries(products).map(([id, data]) => ({
+            id: id,
+            ...data
+        }));
+        
+        const tbody = document.getElementById('productsTable');
+        
+        if (productsArray.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No products yet</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = productsArray.map(p => `
+            <tr>
+                <td>#${p.id}</td>
+                <td><img src="${p.image || 'https://via.placeholder.com/50'}" alt="${p.name}"></td>
+                <td>${p.name}</td>
+                <td>$${parseFloat(p.price).toFixed(2)}</td>
+                <td>${p.stock}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editProduct('${p.id}')">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    }).catch((error) => {
+        console.error('Error loading products:', error);
+    });
 }
 
-function showAddProductModal() {
+window.showAddProductModal = function() {
     editingProductId = null;
     document.getElementById('modalTitle').textContent = 'Add New Product';
     document.getElementById('productName').value = '';
@@ -111,22 +125,28 @@ function showAddProductModal() {
     document.getElementById('productModal').classList.add('active');
 }
 
-function editProduct(id) {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const product = products.find(p => p.id === id);
-    if (!product) return;
-    
-    editingProductId = id;
-    document.getElementById('modalTitle').textContent = 'Edit Product';
-    document.getElementById('productName').value = product.name;
-    document.getElementById('productPrice').value = product.price;
-    document.getElementById('productStock').value = product.stock;
-    document.getElementById('productImage').value = product.image || '';
-    document.getElementById('productDescription').value = product.description || '';
-    document.getElementById('productModal').classList.add('active');
+window.editProduct = async function(id) {
+    try {
+        const productRef = ref(database, 'products/' + id);
+        const snapshot = await get(productRef);
+        const product = snapshot.val();
+        
+        if (!product) return;
+        
+        editingProductId = id;
+        document.getElementById('modalTitle').textContent = 'Edit Product';
+        document.getElementById('productName').value = product.name;
+        document.getElementById('productPrice').value = product.price;
+        document.getElementById('productStock').value = product.stock;
+        document.getElementById('productImage').value = product.image || '';
+        document.getElementById('productDescription').value = product.description || '';
+        document.getElementById('productModal').classList.add('active');
+    } catch (error) {
+        console.error('Error editing product:', error);
+    }
 }
 
-function saveProduct() {
+window.saveProduct = async function() {
     const name = document.getElementById('productName').value.trim();
     const price = parseFloat(document.getElementById('productPrice').value);
     const stock = parseInt(document.getElementById('productStock').value);
@@ -138,129 +158,159 @@ function saveProduct() {
         return;
     }
     
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
-    
-    if (editingProductId) {
-        const idx = products.findIndex(p => p.id === editingProductId);
-        products[idx] = { ...products[idx], name, price, stock, image, description };
-    } else {
-        const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-        products.push({ id: newId, name, price, stock, image, description });
+    try {
+        if (editingProductId) {
+            const productRef = ref(database, 'products/' + editingProductId);
+            await update(productRef, { name, price, stock, image, description });
+        } else {
+            const productsRef = ref(database, 'products');
+            const snapshot = await get(productsRef);
+            const products = snapshot.val() || {};
+            
+            const newId = Object.keys(products).length > 0 
+                ? Math.max(...Object.keys(products).map(k => parseInt(k))) + 1 
+                : 1;
+            
+            await set(ref(database, 'products/' + newId), { name, price, stock, image, description });
+        }
+        
+        closeModal();
+        alert('Product saved successfully!');
+    } catch (error) {
+        console.error('Error saving product:', error);
+        alert('Error saving product. Please try again.');
     }
-    
-    localStorage.setItem('products', JSON.stringify(products));
-    closeModal();
-    loadAllData();
-    alert('Product saved successfully!');
 }
 
-function deleteProduct(id) {
+window.deleteProduct = async function(id) {
     if (!confirm('Are you sure you want to delete this product?')) return;
     
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
-    products = products.filter(p => p.id !== id);
-    localStorage.setItem('products', JSON.stringify(products));
-    loadAllData();
-    alert('Product deleted!');
+    try {
+        const productRef = ref(database, 'products/' + id);
+        await remove(productRef);
+        alert('Product deleted!');
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Error deleting product. Please try again.');
+    }
 }
 
-function closeModal() {
+window.closeModal = function() {
     document.getElementById('productModal').classList.remove('active');
 }
 
-// Orders
 function loadOrdersTable() {
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const tbody = document.getElementById('ordersTable');
-    
-    if (orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No orders yet</td></tr>';
-        return;
+    const ordersRef = ref(database, 'orders');
+    get(ordersRef).then((snapshot) => {
+        const orders = snapshot.val() || {};
+        const ordersArray = Object.entries(orders).map(([id, data]) => ({
+            id: id,
+            ...data
+        }));
+        
+        const tbody = document.getElementById('ordersTable');
+        
+        if (ordersArray.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No orders yet</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = ordersArray.map(o => `
+            <tr>
+                <td>#${o.id}</td>
+                <td>${o.userName}</td>
+                <td>${o.productName}</td>
+                <td>${o.quantity}</td>
+                <td>$${parseFloat(o.total).toFixed(2)}</td>
+                <td>${o.date}</td>
+                <td><span class="status status-${o.status.toLowerCase()}">${o.status}</span></td>
+                <td>
+                    <select onchange="updateOrderStatus('${o.id}', this.value)">
+                        <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="Completed" ${o.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                        <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                    </select>
+                </td>
+            </tr>
+        `).join('');
+    }).catch((error) => {
+        console.error('Error loading orders:', error);
+    });
+}
+
+window.updateOrderStatus = async function(id, status) {
+    try {
+        const orderRef = ref(database, 'orders/' + id);
+        await update(orderRef, { status });
+    } catch (error) {
+        console.error('Error updating order:', error);
     }
-    
-    tbody.innerHTML = orders.map(o => `
-        <tr>
-            <td>#${o.id}</td>
-            <td>${o.userName}</td>
-            <td>${o.productName}</td>
-            <td>${o.quantity}</td>
-            <td>$${o.total.toFixed(2)}</td>
-            <td>${o.date}</td>
-            <td><span class="status status-${o.status.toLowerCase()}">${o.status}</span></td>
-            <td>
-                <select onchange="updateOrderStatus(${o.id}, this.value)" style="padding:5px;border-radius:5px;">
-                    <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                    <option value="Completed" ${o.status === 'Completed' ? 'selected' : ''}>Completed</option>
-                    <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                </select>
-            </td>
-        </tr>
-    `).join('');
 }
 
-function updateOrderStatus(id, status) {
-    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const idx = orders.findIndex(o => o.id === id);
-    orders[idx].status = status;
-    localStorage.setItem('orders', JSON.stringify(orders));
-    loadStats();
-}
-
-// Users
 function loadUsersTable() {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const tbody = document.getElementById('usersTable');
-    
-    tbody.innerHTML = users.map(u => {
-        const userOrders = orders.filter(o => o.userId === u.id).length;
-        return `
+    const usersRef = ref(database, 'users');
+    get(usersRef).then((snapshot) => {
+        const users = snapshot.val() || {};
+        const usersArray = Object.entries(users).map(([id, data]) => ({
+            id: id,
+            ...data
+        }));
+        
+        const tbody = document.getElementById('usersTable');
+        
+        tbody.innerHTML = usersArray.map(u => `
             <tr>
                 <td>#${u.id}</td>
                 <td>${u.name}</td>
                 <td>${u.email}</td>
                 <td>${u.registeredDate}</td>
-                <td>${userOrders}</td>
+                <td>${u.ordersCount || 0}</td>
             </tr>
-        `;
-    }).join('');
+        `).join('');
+    }).catch((error) => {
+        console.error('Error loading users:', error);
+    });
 }
 
-// Stats
 function loadStats() {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const productsRef = ref(database, 'products');
+    const ordersRef = ref(database, 'orders');
     
-    const totalRevenue = orders
-        .filter(o => o.status === 'Completed')
-        .reduce((sum, o) => sum + o.total, 0);
-    
-    const pendingOrders = orders.filter(o => o.status === 'Pending').length;
-    
-    document.getElementById('statsGrid').innerHTML = `
-        <div class="stat-card">
-            <h3>Total Products</h3>
-            <div class="value">${products.length}</div>
-        </div>
-        <div class="stat-card">
-            <h3>Total Revenue</h3>
-            <div class="value">$${totalRevenue.toFixed(2)}</div>
-        </div>
-        <div class="stat-card">
-            <h3>Total Orders</h3>
-            <div class="value">${orders.length}</div>
-        </div>
-        <div class="stat-card">
-            <h3>Pending Orders</h3>
-            <div class="value">${pendingOrders}</div>
-        </div>
-    `;
+    Promise.all([
+        get(productsRef),
+        get(ordersRef)
+    ]).then(([productsSnap, ordersSnap]) => {
+        const products = Object.keys(productsSnap.val() || {}).length;
+        const orders = ordersSnap.val() || {};
+        const ordersArray = Object.values(orders);
+        
+        const totalRevenue = ordersArray
+            .filter(o => o.status === 'Completed')
+            .reduce((sum, o) => sum + parseFloat(o.total), 0);
+        
+        const pendingOrders = ordersArray.filter(o => o.status === 'Pending').length;
+        
+        document.getElementById('statsGrid').innerHTML = `
+            <div class="stat-card">
+                <h3>Total Products</h3>
+                <div class="value">${products}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Revenue</h3>
+                <div class="value">$${totalRevenue.toFixed(2)}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Orders</h3>
+                <div class="value">${ordersArray.length}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Pending Orders</h3>
+                <div class="value">${pendingOrders}</div>
+            </div>
+        `;
+    }).catch((error) => {
+        console.error('Error loading stats:', error);
+    });
 }
 
-// Listen for storage changes from user dashboard
-window.addEventListener('storage', (e) => {
-    if (e.key === 'orders' || e.key === 'products' || e.key === 'users') {
-        loadAllData();
-    }
-});
+console.log('✅ Admin script loaded!');
