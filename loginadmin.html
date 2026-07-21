@@ -112,7 +112,7 @@
                 if (res.ok && data.success) {
                     // ✅ បានកែ: រក្សាទុក Token ហើយ Redirect ទៅ index.html
                     localStorage.setItem('admin_token', data.token);
-                    window.location.href = 'index.html'; 
+                    window.location.href = '../'; 
                 } else {
                     errorDiv.innerText = data.error || 'Invalid password';
                     errorDiv.style.display = 'block';
