@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | AnajakCode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+
+        .login-header { text-align: center; padding: 40px 20px 20px; }
+        .logo {
+            width: 80px; height: 80px; background: linear-gradient(135deg, #6366f1, #818cf8);
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; font-size: 36px; color: white;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        h1 { font-size: 28px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+        .subtitle { color: #64748b; font-size: 15px; }
+
+        .login-form { padding: 0 20px 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: #334155; font-size: 14px; }
+        input {
+            width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px;
+            font-size: 16px; transition: all 0.3s ease; background: #f8fafc; color: #1e293b;
+        }
+        input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+        
+        button {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #6366f1, #818cf8);
+            color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4); }
+        button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .error { color: #ef4444; font-size: 14px; margin-top: 8px; text-align: center; display: none; }
+        .footer { text-align: center; padding: 20px; color: #64748b; font-size: 14px; }
+
+        @media (max-width: 480px) {
+            .login-container { border-radius: 16px; }
+            .logo { width: 70px; height: 70px; font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <!-- បានជួសជុល Logo ឱ្យត្រឡប់មកស្អាតដូចដើម -->
+            <div class="logo"><i class="fas fa-shield-alt"></i></div>
+            <h1>AnajakCode Admin</h1>
+            <p class="subtitle">Secure access to your dashboard</p>
+        </div>
+
+        <form id="loginForm" class="login-form">
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your admin password" required>
+            </div>
+            <button type="submit">Sign In</button>
+            <div id="error" class="error">Invalid password. Please try again.</div>
+        </form>
+
+        <div class="footer">
+            <p>© 2026 AnajakCode. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error');
+            const btn = e.target.querySelector('button');
+            
+            // Show loading state
+            btn.textContent = 'Signing in...';
+            btn.disabled = true;
+            errorDiv.style.display = 'none';
+            
+            try {
+                const res = await fetch('https://payment.forestsmp.site/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    // ✅ បានកែ: រក្សាទុក Token ហើយ Redirect ទៅ index.html
+                    localStorage.setItem('admin_token', data.token);
+                    window.location.href = 'index.html'; 
+                } else {
+                    errorDiv.innerText = data.error || 'Invalid password';
+                    errorDiv.style.display = 'block';
+                    btn.textContent = 'Sign In';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                errorDiv.innerText = 'Connection failed. Check internet.';
+                errorDiv.style.display = 'block';
+                btn.textContent = 'Sign In';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
