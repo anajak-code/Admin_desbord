@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="km">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnajakCode Admin</title>
+    <title>DESHBORD</title>
     <link rel="stylesheet" href="./theme/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -20,16 +19,15 @@
         <!-- SIDEBAR -->
         <aside class="sidebar glass">
             <div class="sidebar-header">
-                <span class="logo-icon">⚡</span>
+                <span class="logo-icon">️</span>
                 <h2>AnajakCode</h2>
             </div>
-
             <ul class="nav-menu">
                 <li class="nav-item active" data-section="overview">
                     <i class="fas fa-chart-pie"></i> Overview
                 </li>
                 <li class="nav-item" data-section="products">
-                    <i class="fas fa-box-open"></i> Products
+                    <i class="fas fa-cube"></i> Plugins
                 </li>
                 <li class="nav-item" data-section="orders">
                     <i class="fas fa-shopping-cart"></i> Orders
@@ -37,11 +35,13 @@
                 <li class="nav-item" data-section="users">
                     <i class="fas fa-users"></i> Users
                 </li>
+                <li class="nav-item" data-section="support">
+                    <i class="fas fa-headset"></i> Support
+                </li>
                 <li class="nav-item" data-section="settings">
                     <i class="fas fa-cog"></i> Settings
                 </li>
             </ul>
-
             <div class="sidebar-footer">
                 <button class="btn-logout" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Log Out
@@ -53,17 +53,15 @@
         <main class="main-content">
             <div class="page-header">
                 <h1 id="page-title">Overview</h1>
-                <p>Welcome back, Administrator</p>
+                <p>Admin Dashboard management</p>
             </div>
 
-            <!-- 1. OVERVIEW SECTION -->
+            <!-- OVERVIEW SECTION -->
             <div id="section-overview" class="section active">
-                <!-- Stat Cards -->
                 <div id="stats-grid" class="stats-grid">
                     <div class="loading"><div class="spinner"></div>Loading stats...</div>
                 </div>
 
-                <!-- Charts & Widgets -->
                 <div class="dashboard-widgets">
                     <div class="card chart-card">
                         <div class="card-header">
@@ -74,55 +72,37 @@
                     
                     <div class="card recent-orders-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-clock"></i> Recent Orders</h3>
+                            <h3><i class="fas fa-clock"></i> Recent Sales</h3>
                         </div>
                         <div id="recent-orders-list" class="list-container">
                             <div class="loading"><div class="spinner"></div></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Low Stock Alerts -->
-                <div class="card alert-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-exclamation-triangle text-warning"></i> Low Stock Alerts</h3>
-                    </div>
-                    <div id="low-stock-list" class="list-container">
-                        <p class="empty-state-text">No low stock items</p>
-                    </div>
-                </div>
             </div>
 
-            <!-- 6-9, 11. PRODUCTS SECTION -->
+            <!-- PRODUCTS (PLUGINS) SECTION -->
             <div id="section-products" class="section">
                 <div class="card">
                     <div class="card-header actions-header">
-                        <h3>All Products</h3>
+                        <h3>All Plugins</h3>
                         <div class="header-actions">
-                            <input type="text" id="product-search" placeholder="Search products..." class="search-input">
+                            <input type="text" id="product-search" placeholder="Search plugins..." class="search-input">
                             <button class="btn btn-primary" onclick="openProductModal()">
-                                <i class="fas fa-plus"></i> Add Product
+                                <i class="fas fa-plus"></i> Add Plugin
                             </button>
                         </div>
                     </div>
                     
-                    <!-- Bulk Actions Bar -->
-                    <div id="bulk-actions-bar" class="bulk-bar hidden">
-                        <span id="selected-count">0 selected</span>
-                        <button class="btn btn-danger btn-sm" onclick="bulkDeleteProducts()">
-                            <i class="fas fa-trash"></i> Delete Selected
-                        </button>
-                    </div>
-
                     <div class="table-wrapper">
                         <table>
                             <thead>
                                 <tr>
-                                    <th width="40"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"></th>
                                     <th>ID</th>
-                                    <th>Product</th>
+                                    <th>Plugin</th>
                                     <th>Price</th>
                                     <th>Stock</th>
+                                    <th>File</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -134,11 +114,11 @@
                 </div>
             </div>
 
-            <!-- 13, 15. ORDERS SECTION -->
+            <!-- ORDERS SECTION -->
             <div id="section-orders" class="section">
                 <div class="card">
                     <div class="card-header">
-                        <h3>Customer Orders</h3>
+                        <h3><i class="fas fa-shopping-cart"></i> Customer Orders</h3>
                     </div>
                     <div class="table-wrapper">
                         <table>
@@ -160,11 +140,11 @@
                 </div>
             </div>
 
-            <!-- 16-18. USERS SECTION -->
+            <!-- USERS SECTION -->
             <div id="section-users" class="section">
                 <div class="card">
                     <div class="card-header">
-                        <h3>User Management</h3>
+                        <h3><i class="fas fa-users"></i> User Management</h3>
                     </div>
                     <div class="table-wrapper">
                         <table>
@@ -185,24 +165,50 @@
                 </div>
             </div>
 
-            <!-- 19. SETTINGS SECTION -->
+            <!-- SUPPORT TICKET SECTION -->
+            <div id="section-support" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-ticket-alt"></i> Customer Support Tickets</h3>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User Email</th>
+                                    <th>Subject</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tickets-tbody">
+                                <tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS SECTION -->
             <div id="section-settings" class="section">
                 <div class="card">
                     <div class="card-header">
-                        <h3>Shop Settings</h3>
+                        <h3><i class="fas fa-store"></i> Shop Settings</h3>
                     </div>
                     <form id="settings-form" onsubmit="saveSettings(event)">
                         <div class="form-group">
                             <label>Shop Name</label>
-                            <input type="text" class="form-control" id="set-shop-name">
+                            <input type="text" class="form-control" id="set-shop-name" placeholder="AnajakCode Shop">
                         </div>
                         <div class="form-group">
                             <label>Contact Email</label>
-                            <input type="email" class="form-control" id="set-shop-email">
+                            <input type="email" class="form-control" id="set-shop-email" placeholder="support@shop.com">
                         </div>
                         <div class="form-group">
                             <label>Phone Number</label>
-                            <input type="tel" class="form-control" id="set-shop-phone">
+                            <input type="tel" class="form-control" id="set-shop-phone" placeholder="+855 12 345 678">
                         </div>
                         <div class="form-group">
                             <label>Address</label>
@@ -214,10 +220,9 @@
                     </form>
                 </div>
                 
-                <!-- 20. Export Data -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>Data Export</h3>
+                        <h3><i class="fas fa-download"></i> Data Export</h3>
                     </div>
                     <div class="export-buttons">
                         <button class="btn btn-outline" onclick="exportData('csv')">
@@ -236,32 +241,48 @@
     <div id="product-modal" class="modal-overlay">
         <div class="modal-box">
             <span class="modal-close" onclick="closeModal('product-modal')">&times;</span>
-            <h2 id="modal-product-title">Add New Product</h2>
+            <h2 id="modal-product-title">Add New Plugin</h2>
             <form id="product-form" onsubmit="saveProduct(event)">
                 <div class="form-group">
-                    <label>Product Name *</label>
-                    <input type="text" class="form-control" id="prod-name" required>
+                    <label>Plugin Name *</label>
+                    <input type="text" class="form-control" id="prod-name" required placeholder="e.g., SuperHub Pro">
                 </div>
-                <div class="form-group">
-                    <label>Price ($) *</label>
-                    <input type="number" class="form-control" id="prod-price" step="0.01" min="0" required>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price ($) *</label>
+                        <input type="number" class="form-control" id="prod-price" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock/License Keys</label>
+                        <input type="number" class="form-control" id="prod-stock" min="0" value="999">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Stock Quantity</label>
-                    <input type="number" class="form-control" id="prod-stock" min="0" value="0">
-                </div>
+                
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea class="form-control" id="prod-desc" rows="3"></textarea>
+                    <textarea class="form-control" id="prod-desc" rows="3" placeholder="Plugin features and description..."></textarea>
                 </div>
+                
                 <div class="form-group">
-                    <label>Product Image</label>
+                    <label>Plugin File (.jar) *</label>
+                    <div class="file-upload-box" onclick="document.getElementById('prod-file').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span id="file-name-display">Click to upload .jar file</span>
+                        <input type="file" id="prod-file" accept=".jar,.zip" hidden onchange="updateFileName(this)">
+                    </div>
+                    <input type="hidden" id="prod-file-url">
+                </div>
+                
+                <div class="form-group">
+                    <label>Cover Image</label>
                     <input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(event)">
                     <input type="hidden" id="prod-image-url">
                     <div id="product-image-preview"></div>
                 </div>
+
                 <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-save"></i> Save Product
+                    <i class="fas fa-save"></i> Save Plugin
                 </button>
             </form>
         </div>
@@ -276,7 +297,16 @@
         </div>
     </div>
 
+    <!-- TICKET DETAILS MODAL -->
+    <div id="ticket-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="modal-close" onclick="closeModal('ticket-modal')">&times;</span>
+            <h2>Ticket Details</h2>
+            <div id="ticket-details-content"></div>
+        </div>
+    </div>
+
     <script src="./api.js"></script>
     <script src="./function/script.js"></script>
 </body>
-                                                    </html>
+</html>
