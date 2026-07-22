@@ -12,77 +12,204 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style_design.css">
+    <!-- Embedded CSS -->
+    <style>
+        :root {
+            --primary: #6366f1; --primary-light: #818cf8; --primary-dark: #4f46e5;
+            --secondary: #0ea5e9; --success: #10b981; --warning: #f59e0b;
+            --danger: #ef4444; --info: #8b5cf6;
+            --bg-main: #f1f5f9; --bg-sidebar: #1e1b4b; --bg-sidebar-hover: #312e81;
+            --bg-card: #ffffff; --bg-topbar: #ffffff;
+            --text-primary: #1e293b; --text-secondary: #64748b;
+            --text-sidebar: #c7d2fe; --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1);
+            --sidebar-width: 270px; --topbar-height: 70px; --radius: 12px; --radius-sm: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-theme="dark"] {
+            --bg-main: #0f172a; --bg-sidebar: #0c0a1d; --bg-sidebar-hover: #1e1b4b;
+            --bg-card: #1e293b; --bg-topbar: #1e293b;
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --border: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-primary); overflow-x: hidden; transition: var(--transition); }
+        a { text-decoration: none; color: inherit; } ul { list-style: none; }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 3px; }
+
+        .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); z-index: 1000; transition: var(--transition); display: flex; flex-direction: column; overflow-y: auto; }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar-header { padding: 20px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); min-height: var(--topbar-height); }
+        .sidebar-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; font-weight: 800; flex-shrink: 0; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; transition: var(--transition); }
+        .sidebar.collapsed .sidebar-brand, .sidebar.collapsed .menu-label, .sidebar.collapsed .menu-text, .sidebar.collapsed .menu-badge, .sidebar.collapsed .sidebar-user-info { opacity: 0; width: 0; overflow: hidden; }
+        .sidebar-menu { padding: 16px 12px; flex: 1; }
+        .menu-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1.2px; padding: 16px 12px 8px; white-space: nowrap; }
+        .menu-item { margin-bottom: 2px; }
+        .menu-link { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: var(--radius-sm); color: var(--text-sidebar); transition: var(--transition); cursor: pointer; }
+        .menu-link:hover { background: var(--bg-sidebar-hover); color: white; }
+        .menu-link.active { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
+        .menu-link i { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+        .menu-text { font-size: 14px; font-weight: 500; white-space: nowrap; }
+        .menu-badge { margin-left: auto; background: var(--danger); color: white; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+        .sidebar-footer { padding: 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+        .sidebar-user { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.05); }
+        .sidebar-user-avatar { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--success), var(--secondary)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+        .sidebar-user-name { font-size: 13px; font-weight: 600; color: white; white-space: nowrap; }
+        .sidebar-user-role { font-size: 11px; color: var(--text-sidebar); white-space: nowrap; }
+
+        .main-content { margin-left: var(--sidebar-width); transition: var(--transition); min-height: 100vh; }
+        .sidebar.collapsed ~ .main-content { margin-left: 80px; }
+
+        .topbar { position: sticky; top: 0; height: var(--topbar-height); background: var(--bg-topbar); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; z-index: 999; backdrop-filter: blur(10px); }
+        .topbar-left { display: flex; align-items: center; gap: 16px; }
+        .toggle-sidebar { width: 40px; height: 40px; border: none; background: var(--bg-main); border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-secondary); transition: var(--transition); }
+        .toggle-sidebar:hover { background: var(--primary); color: white; }
+        .search-box { position: relative; }
+        .search-box input { width: 320px; padding: 10px 16px 10px 42px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-main); color: var(--text-primary); font-size: 14px; transition: var(--transition); }
+        .search-box input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+        .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+        .topbar-right { display: flex; align-items: center; gap: 8px; }
+        .topbar-btn { width: 42px; height: 42px; border: none; background: transparent; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-secondary); transition: var(--transition); position: relative; }
+        .topbar-btn:hover { background: var(--bg-main); color: var(--primary); }
+        .topbar-btn .badge { position: absolute; top: 6px; right: 6px; width: 18px; height: 18px; background: var(--danger); color: white; font-size: 10px; font-weight: 700; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-topbar); }
+        .theme-toggle .fa-sun { display: none; }
+        [data-theme="dark"] .theme-toggle .fa-sun { display: inline; }
+        [data-theme="dark"] .theme-toggle .fa-moon { display: none; }
+
+        .dashboard { padding: 28px 30px; }
+        .dashboard-header { margin-bottom: 28px; }
+        .dashboard-header h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+        .dashboard-header p { color: var(--text-secondary); font-size: 14px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
+        .stat-card { background: var(--bg-card); border-radius: var(--radius); padding: 22px; border: 1px solid var(--border); transition: var(--transition); position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+        .stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--primary), var(--primary-light)); }
+        .stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--success), #34d399); }
+        .stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+        .stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--danger), #f87171); }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-xl); }
+        .stat-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .icon-blue { background: rgba(99,102,241,0.1); color: var(--primary); }
+        .icon-green { background: rgba(16,185,129,0.1); color: var(--success); }
+        .icon-orange { background: rgba(245,158,11,0.1); color: var(--warning); }
+        .icon-red { background: rgba(239,68,68,0.1); color: var(--danger); }
+        .stat-value { font-size: 28px; font-weight: 800; margin-bottom: 4px; line-height: 1; }
+        .stat-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+        .card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); transition: var(--transition); margin-bottom: 20px; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px 0; }
+        .card-title { font-size: 16px; font-weight: 700; }
+        .card-body { padding: 20px 22px; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        tbody td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--border); }
+        tbody tr { transition: var(--transition); }
+        tbody tr:hover { background: rgba(99, 102, 241, 0.03); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; transition: var(--transition); display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--primary); color: white; } .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-secondary { background: var(--bg-main); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-sm { padding: 4px 8px; font-size: 11px; }
+
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .status-badge.completed, .status-badge.delivered, .status-badge.paid, .status-badge.active { background: rgba(16,185,129,0.1); color: var(--success); }
+        .status-badge.pending, .status-badge.processing, .status-badge.shipped { background: rgba(245,158,11,0.1); color: var(--warning); }
+        .status-badge.cancelled, .status-badge.refunded, .status-badge.banned { background: rgba(239,68,68,0.1); color: var(--danger); }
+        .status-badge.unpaid { background: rgba(100,116,139,0.1); color: var(--text-secondary); }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--bg-card); border-radius: var(--radius); width: 600px; max-width: 95%; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .modal-title { font-size: 18px; font-weight: 700; }
+        .modal-close { width: 32px; height: 32px; border: none; background: var(--bg-main); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: var(--transition); }
+        .modal-close:hover { background: var(--danger); color: white; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .form-group { margin-bottom: 16px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 13px; }
+        .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-main); color: var(--text-primary); font-size: 14px; font-family: inherit; transition: var(--transition); }
+        .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+        textarea.form-control { resize: vertical; min-height: 80px; }
+        select.form-control { cursor: pointer; }
+        .hidden { display: none !important; }
+
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--bg-card); border-left: 4px solid var(--primary); padding: 14px 18px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 12px; min-width: 300px; animation: slideInRight 0.3s ease forwards; }
+        .toast.success { border-left-color: var(--success); } .toast.error { border-left-color: var(--danger); } .toast.warning { border-left-color: var(--warning); }
+        .toast-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; flex-shrink: 0; }
+        .toast.success .toast-icon { background: var(--success); } .toast.error .toast-icon { background: var(--danger); } .toast.warning .toast-icon { background: var(--warning); }
+        .toast-content { flex: 1; } .toast-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; } .toast-message { font-size: 12px; color: var(--text-secondary); }
+        .toast-close { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateX(100%); } }
+        .toast.removing { animation: fadeOut 0.3s ease forwards; }
+
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .chart-container { position: relative; height: 300px; }
+        .realtime-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .realtime-card { background: var(--bg-card); padding: 16px; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .realtime-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .realtime-value { font-size: 20px; font-weight: 700; } .realtime-label { font-size: 12px; color: var(--text-secondary); }
+        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; display: inline-block; margin-right: 6px; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .customer-cell { display: flex; align-items: center; gap: 10px; }
+        .customer-avatar { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+        .customer-name { font-weight: 600; } .customer-email { font-size: 11px; color: var(--text-secondary); }
+        .product-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
+
+        .shortcut-hint { position: fixed; bottom: 20px; left: 20px; background: var(--bg-card); padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; color: var(--text-secondary); z-index: 100; }
+        .shortcut-hint kbd { background: var(--bg-main); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); font-family: monospace; font-size: 11px; }
+
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); } .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-left: 0 !important; } .stats-grid { grid-template-columns: 1fr; }
+            .search-box input { width: 180px; } .dashboard { padding: 20px 16px; } .topbar { padding: 0 16px; }
+            .form-row { grid-template-columns: 1fr; } .modal-content { width: 95%; } .realtime-grid { grid-template-columns: 1fr 1fr; }
+            table { font-size: 12px; } td, th { padding: 8px; } .toast-container { right: 10px; left: 10px; } .toast { min-width: auto; } .shortcut-hint { display: none; }
+        }
+        @media (max-width: 480px) { .search-box { display: none; } }
+    </style>
 </head>
 <body>
 
-    <!-- SIDEBAR OVERLAY (Mobile) -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- TOAST CONTAINER -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- ===== SIDEBAR ===== -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">A</div>
             <span class="sidebar-brand">AnajakCode</span>
         </div>
-
         <nav class="sidebar-menu">
-            <div class="menu-label">ម៉នុយសំខាន់</div>
+            <div class="menu-label">ម៉ឺនុយសំខាន់</div>
             <ul>
-                <li class="menu-item">
-                    <a class="menu-link active" data-section="dashboard">
-                        <i class="fas fa-th-large"></i>
-                        <span class="menu-text">ផ្ទាំងគរប់គ្រង</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a class="menu-link" data-section="products">
-                        <i class="fas fa-box"></i>
-                        <span class="menu-text">ផលិតផល</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a class="menu-link" data-section="orders">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="menu-text">ការបញជាទិញ</span>
-                        <span class="menu-badge" id="pending-orders-badge">0</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a class="menu-link" data-section="users">
-                        <i class="fas fa-users"></i>
-                        <span class="menu-text">អនកប្រើប្រាស់</span>
-                    </a>
-                </li>
+                <li class="menu-item"><a class="menu-link active" data-section="dashboard"><i class="fas fa-th-large"></i><span class="menu-text">ផ្ទាំងគ្រប់គ្រង</span></a></li>
+                <li class="menu-item"><a class="menu-link" data-section="products"><i class="fas fa-box"></i><span class="menu-text">ផលិតផល</span></a></li>
+                <li class="menu-item"><a class="menu-link" data-section="orders"><i class="fas fa-shopping-cart"></i><span class="menu-text">ការបញ្ជាទិញ</span><span class="menu-badge" id="pending-orders-badge">0</span></a></li>
+                <li class="menu-item"><a class="menu-link" data-section="users"><i class="fas fa-users"></i><span class="menu-text">អ្នកប្រើប្រាស់</span></a></li>
             </ul>
-
-            <div class="menu-label">គ្រប់គរង</div>
+            <div class="menu-label">គ្រប់គ្រង</div>
             <ul>
-                <li class="menu-item">
-                    <a class="menu-link" data-section="discounts">
-                        <i class="fas fa-tags"></i>
-                        <span class="menu-text">កូដបញ្ចុះតម្លៃ</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a class="menu-link" data-section="stock">
-                        <i class="fas fa-warehouse"></i>
-                        <span class="menu-text">គ្រប់គ្រងសតុក</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a class="menu-link" data-section="settings">
-                        <i class="fas fa-cog"></i>
-                        <span class="menu-text">ការកំណត់</span>
-                    </a>
-                </li>
+                <li class="menu-item"><a class="menu-link" data-section="discounts"><i class="fas fa-tags"></i><span class="menu-text">កូដបញ្ចុះតម្លៃ</span></a></li>
+                <li class="menu-item"><a class="menu-link" data-section="stock"><i class="fas fa-warehouse"></i><span class="menu-text">គ្រប់គ្រងស្តុក</span></a></li>
+                <li class="menu-item"><a class="menu-link" data-section="settings"><i class="fas fa-cog"></i><span class="menu-text">ការកំណត់</span></a></li>
             </ul>
         </nav>
-
         <div class="sidebar-footer">
             <div class="sidebar-user">
                 <div class="sidebar-user-avatar">A</div>
@@ -94,393 +221,130 @@
         </div>
     </aside>
 
-    <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
-        
-        <!-- TOPBAR -->
         <header class="topbar">
             <div class="topbar-left">
-                <button class="toggle-sidebar" id="toggleSidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="ស្វែងរក...">
-                </div>
+                <button class="toggle-sidebar" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="ស្វែងរក..."></div>
             </div>
             <div class="topbar-right">
-                <button class="topbar-btn theme-toggle" id="themeToggle" title="ប្ដូរ Theme">
-                    <i class="fas fa-moon"></i>
-                    <i class="fas fa-sun"></i>
-                </button>
-                <button class="topbar-btn" onclick="showInventoryAlerts()" title="ការជូនដំណឹងស្តុក">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge" id="notif-badge">0</span>
-                </button>
-                <button class="topbar-btn" onclick="handleLogout()" title="ចាកចេញ">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
+                <button class="topbar-btn theme-toggle" id="themeToggle" title="ប្តូរ Theme"><i class="fas fa-moon"></i><i class="fas fa-sun"></i></button>
+                <button class="topbar-btn" onclick="showInventoryAlerts()" title="ការជូនដំណឹងស្តុក"><i class="fas fa-bell"></i><span class="badge" id="notif-badge">0</span></button>
+                <button class="topbar-btn" onclick="handleLogout()" title="ចាកចេញ"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         </header>
 
-        <!-- DASHBOARD CONTENT -->
         <div class="dashboard">
-            
-            <!-- SECTION: DASHBOARD -->
             <div class="section active" id="section-dashboard">
-                <div class="dashboard-header">
-                    <h1>👋 សួស្ដី, Admin!</h1>
-                    <p>នេះជាទិដ្ឋភាពទូទៅនៃប្រព័នធរបស់អ្នកនៅថ្ងៃនេះ។</p>
-                </div>
-
+                <div class="dashboard-header"><h1>👋 សួស្តី, Admin!</h1><p>នេះជាទិដ្ឋភាពទូទៅនៃប្រព័ន្ធរបស់អ្នកនៅថ្ងៃនេះ។</p></div>
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon icon-blue"><i class="fas fa-dollar-sign"></i></div>
-                        </div>
-                        <div class="stat-value" id="stat-revenue">$0</div>
-                        <div class="stat-label">ចំណូលសរុប</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon icon-green"><i class="fas fa-shopping-bag"></i></div>
-                        </div>
-                        <div class="stat-value" id="stat-orders">0</div>
-                        <div class="stat-label">ការបញ្ជាទិញ</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon icon-orange"><i class="fas fa-box"></i></div>
-                        </div>
-                        <div class="stat-value" id="stat-products">0</div>
-                        <div class="stat-label">ផលិតផលសរុប</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon icon-red"><i class="fas fa-users"></i></div>
-                        </div>
-                        <div class="stat-value" id="stat-users">0</div>
-                        <div class="stat-label">អ្នកប្រើប្រាស់</div>
-                    </div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-blue"><i class="fas fa-dollar-sign"></i></div></div><div class="stat-value" id="stat-revenue">$0</div><div class="stat-label">ចំណូលសរុប</div></div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-green"><i class="fas fa-shopping-bag"></i></div></div><div class="stat-value" id="stat-orders">0</div><div class="stat-label">ការបញ្ជាទិញ</div></div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-orange"><i class="fas fa-box"></i></div></div><div class="stat-value" id="stat-products">0</div><div class="stat-label">ផលិតផលសរុប</div></div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-red"><i class="fas fa-users"></i></div></div><div class="stat-value" id="stat-users">0</div><div class="stat-label">អ្នកប្រើប្រាស់</div></div>
                 </div>
-
-                <!-- REAL-TIME MONITORING -->
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title"><span class="live-dot"></span> Real-Time Monitoring</h3>
-                        <span style="font-size:12px; color:var(--text-secondary);" id="lastUpdate">Updated just now</span>
-                    </div>
+                    <div class="card-header"><h3 class="card-title"><span class="live-dot"></span> Real-Time Monitoring</h3><span style="font-size:12px; color:var(--text-secondary);" id="lastUpdate">Updated just now</span></div>
                     <div class="card-body">
                         <div class="realtime-grid">
-                            <div class="realtime-card">
-                                <div class="realtime-icon" style="background:rgba(245,158,11,0.1); color:var(--warning);"><i class="fas fa-clock"></i></div>
-                                <div><div class="realtime-value" id="rt-active">0</div><div class="realtime-label">Pending Orders</div></div>
-                            </div>
-                            <div class="realtime-card">
-                                <div class="realtime-icon" style="background:rgba(16,185,129,0.1); color:var(--success);"><i class="fas fa-user-plus"></i></div>
-                                <div><div class="realtime-value" id="rt-new-users">0</div><div class="realtime-label">New Users Today</div></div>
-                            </div>
-                            <div class="realtime-card">
-                                <div class="realtime-icon" style="background:rgba(99,102,241,0.1); color:var(--primary);"><i class="fas fa-shopping-cart"></i></div>
-                                <div><div class="realtime-value" id="rt-new-orders">0</div><div class="realtime-label">Orders Today</div></div>
-                            </div>
-                            <div class="realtime-card">
-                                <div class="realtime-icon" style="background:rgba(239,68,68,0.1); color:var(--danger);"><i class="fas fa-exclamation-triangle"></i></div>
-                                <div><div class="realtime-value" id="rt-low-stock">0</div><div class="realtime-label">Low Stock Items</div></div>
-                            </div>
+                            <div class="realtime-card"><div class="realtime-icon" style="background:rgba(245,158,11,0.1); color:var(--warning);"><i class="fas fa-clock"></i></div><div><div class="realtime-value" id="rt-active">0</div><div class="realtime-label">Pending Orders</div></div></div>
+                            <div class="realtime-card"><div class="realtime-icon" style="background:rgba(16,185,129,0.1); color:var(--success);"><i class="fas fa-user-plus"></i></div><div><div class="realtime-value" id="rt-new-users">0</div><div class="realtime-label">New Users Today</div></div></div>
+                            <div class="realtime-card"><div class="realtime-icon" style="background:rgba(99,102,241,0.1); color:var(--primary);"><i class="fas fa-shopping-cart"></i></div><div><div class="realtime-value" id="rt-new-orders">0</div><div class="realtime-label">Orders Today</div></div></div>
+                            <div class="realtime-card"><div class="realtime-icon" style="background:rgba(239,68,68,0.1); color:var(--danger);"><i class="fas fa-exclamation-triangle"></i></div><div><div class="realtime-value" id="rt-low-stock">0</div><div class="realtime-label">Low Stock Items</div></div></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- CHART -->
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">📈 ទិដឋភាពទូទៅនៃចំណូល</h3>
-                        <button class="btn btn-primary btn-sm" onclick="refreshChart()"><i class="fas fa-sync-alt"></i> Refresh</button>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                    </div>
+                    <div class="card-header"><h3 class="card-title">📈 ទិដ្ឋភាពទូទៅនៃចំណូល</h3><button class="btn btn-primary btn-sm" onclick="refreshChart()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+                    <div class="card-body"><div class="chart-container"><canvas id="revenueChart"></canvas></div></div>
                 </div>
             </div>
 
-            <!-- SECTION: PRODUCTS -->
             <div class="section hidden" id="section-products">
-                <div class="dashboard-header">
-                    <h1>📦 គ្រប់គរងផលិតផល</h1>
-                    <p>បន្ថែម កែសម្រួល និងលុបផលិតផល</p>
-                </div>
+                <div class="dashboard-header"><h1>📦 គ្រប់គ្រងផលិតផល</h1><p>បន្ថែម កែសម្រួល និងលុបផលិតផល</p></div>
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">បញ្ជីផលិតផល</h3>
-                        <button class="btn btn-primary" onclick="openProductModal()">
-                            <i class="fas fa-plus"></i> បន្ថែមផលិតផល
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-wrapper">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>រូបភាព</th>
-                                        <th>ឈ្មោះ</th>
-                                        <th>តមលៃ</th>
-                                        <th>ស្តុក</th>
-                                        <th>ប្រភេទ</th>
-                                        <th>សកម្មភាព</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="product-table-body">
-                                    <tr><td colspan="6" style="text-align:center;">កំពុងផ្ទុក...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="card-header"><h3 class="card-title">បញ្ជីផលិតផល</h3><button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> បន្ថែមផលិតផល</button></div>
+                    <div class="card-body"><div class="table-wrapper"><table><thead><tr><th>រូបភាព</th><th>ឈ្មោះ</th><th>តម្លៃ</th><th>ស្តុក</th><th>ប្រភេទ</th><th>សកម្មភាព</th></tr></thead><tbody id="product-table-body"><tr><td colspan="6" style="text-align:center;">កំពុងផ្ទុក...</td></tr></tbody></table></div></div>
                 </div>
             </div>
 
-            <!-- SECTION: ORDERS -->
             <div class="section hidden" id="section-orders">
-                <div class="dashboard-header">
-                    <h1>🛒 ការបញ្ជាទិញ</h1>
-                    <p>គ្រប់គ្ង និងបោះពុម្ពវិក្កយបត្រ</p>
-                </div>
+                <div class="dashboard-header"><h1>🛒 ការបញ្ជាទិញ</h1><p>គ្រប់គ្រង និងបោះពុម្ពវិក្កយបត្រ</p></div>
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">បញ្ជីការបញ្ជាទិញ</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-wrapper">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>លេខ</th>
-                                        <th>អតិថិជន</th>
-                                        <th>ទឹកប្រាក់</th>
-                                        <th>ស្ថានភាព</th>
-                                        <th>កាលបរិច្ឆេទ</th>
-                                        <th>សកម្ភាព</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="order-table-body">
-                                    <tr><td colspan="6" style="text-align:center;">កំពុងផ្ទុក...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="card-header"><h3 class="card-title">បញ្ជីការបញ្ជាទិញ</h3></div>
+                    <div class="card-body"><div class="table-wrapper"><table><thead><tr><th>លេខ</th><th>អតិថិជន</th><th>ទឹកប្រាក់</th><th>ស្ថានភាព</th><th>កាលបរិច្ឆេទ</th><th>សកម្មភាព</th></tr></thead><tbody id="order-table-body"><tr><td colspan="6" style="text-align:center;">កំពុងផ្ទុក...</td></tr></tbody></table></div></div>
                 </div>
             </div>
 
-            <!-- SECTION: USERS -->
             <div class="section hidden" id="section-users">
-                <div class="dashboard-header">
-                    <h1>👥 អនកប្រើប្រាស់</h1>
-                    <p>គ្រប់គ្រងអ្កប្រើប្រាស់ រួមទាំង Ban/Unban</p>
-                </div>
+                <div class="dashboard-header"><h1>👥 អ្នកប្រើប្រាស់</h1><p>គ្រប់គ្រងអ្នកប្រើប្រាស់ រួមទាំង Ban/Unban</p></div>
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">បញ្ជីអ្នកប្ើប្រាស់</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-wrapper">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>អ្កប្រើ</th>
-                                        <th>អ៊ីមែល</th>
-                                        <th>តួនាទី</th>
-                                        <th>ស្ថានភាព</th>
-                                        <th>សកម្មភាព</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="user-table-body">
-                                    <tr><td colspan="5" style="text-align:center;">កំពុងផ្ទុក...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="card-header"><h3 class="card-title">បញ្ជីអ្នកប្រើប្រាស់</h3></div>
+                    <div class="card-body"><div class="table-wrapper"><table><thead><tr><th>អ្នកប្រើ</th><th>អ៊ីមែល</th><th>តួនាទី</th><th>ស្ថានភាព</th><th>សកម្មភាព</th></tr></thead><tbody id="user-table-body"><tr><td colspan="5" style="text-align:center;">កំពុងផ្ទុក...</td></tr></tbody></table></div></div>
                 </div>
             </div>
 
-            <!-- SECTION: DISCOUNTS -->
             <div class="section hidden" id="section-discounts">
-                <div class="dashboard-header">
-                    <h1>🏷️ កូដបញ្ចុះតម្លៃ</h1>
-                    <p>បងកើត និងគ្រប់គរងកូដបញ្ចុះតម្លៃ</p>
-                </div>
+                <div class="dashboard-header"><h1>🏷️ កូដបញ្ចុះតម្លៃ</h1><p>បង្កើត និងគ្រប់គ្រងកូដបញ្ចុះតម្លៃ</p></div>
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">បញ្ជីកូដបញ្ចុះតម្លៃ</h3>
-                        <button class="btn btn-primary" onclick="openDiscountModal()">
-                            <i class="fas fa-plus"></i> បង្កើតកូដថ្មី
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-wrapper">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>កូដ</th>
-                                        <th>ការពិពណ៌នា</th>
-                                        <th>បញ្ចុះ</th>
-                                        <th>ការប្រើប្ាស់</th>
-                                        <th>ស្ថានភាព</th>
-                                        <th>សកម្មភាព</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="discount-table-body">
-                                    <tr><td colspan="6" style="text-align:center;">កំពុងផ្ទុក...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="card-header"><h3 class="card-title">បញ្ជីកូដបញ្ចុះតម្លៃ</h3><button class="btn btn-primary" onclick="openDiscountModal()"><i class="fas fa-plus"></i> បង្កើតកូដថ្មី</button></div>
+                    <div class="card-body"><div class="table-wrapper"><table><thead><tr><th>កូដ</th><th>ការពិពណ៌នា</th><th>បញ្ចុះ</th><th>ការប្រើប្រាស់</th><th>ស្ថានភាព</th><th>សកម្មភាព</th></tr></thead><tbody id="discount-table-body"><tr><td colspan="6" style="text-align:center;">កំពុងផ្ទុក...</td></tr></tbody></table></div></div>
                 </div>
             </div>
 
-            <!-- SECTION: STOCK -->
             <div class="section hidden" id="section-stock">
-                <div class="dashboard-header">
-                    <h1>📦 គ្រប់គរងស្តុក</h1>
-                    <p>តាមដានចលនាស្តុក និងកែសម្រួល</p>
-                </div>
+                <div class="dashboard-header"><h1>📦 គ្រប់គ្រងស្តុក</h1><p>តាមដានចលនាស្តុក និងកែសម្រួល</p></div>
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-card-header"><div class="stat-icon icon-blue"><i class="fas fa-box"></i></div></div>
-                        <div class="stat-value" id="stock-total">0</div>
-                        <div class="stat-label">ផលិតផលសរុប</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-header"><div class="stat-icon icon-red"><i class="fas fa-exclamation-triangle"></i></div></div>
-                        <div class="stat-value" id="stock-low">0</div>
-                        <div class="stat-label">ស្តុកទាប</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-header"><div class="stat-icon icon-green"><i class="fas fa-check-circle"></i></div></div>
-                        <div class="stat-value" id="stock-ok">0</div>
-                        <div class="stat-label">ស្តុកគ្ប់គ្រាន់</div>
-                    </div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-blue"><i class="fas fa-box"></i></div></div><div class="stat-value" id="stock-total">0</div><div class="stat-label">ផលិតផលសរុប</div></div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-red"><i class="fas fa-exclamation-triangle"></i></div></div><div class="stat-value" id="stock-low">0</div><div class="stat-label">ស្តុកទាប</div></div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-green"><i class="fas fa-check-circle"></i></div></div><div class="stat-value" id="stock-ok">0</div><div class="stat-label">ស្តុកគ្រប់គ្រាន់</div></div>
                 </div>
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">បញ្ជីផលិតផល (គ្រប់គ្រងសតុក)</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-wrapper">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>ផលិតផល</th>
-                                        <th>SKU</th>
-                                        <th>ស្តុកបចចុប្បន្ន</th>
-                                        <th>ស្តុកអប្បបរមា</th>
-                                        <th>សកម្មភាព</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="stock-table-body">
-                                    <tr><td colspan="5" style="text-align:center;">កំពុងផ្ទុក...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="card-header"><h3 class="card-title">បញ្ជីផលិតផល (គ្រប់គ្រងស្តុក)</h3></div>
+                    <div class="card-body"><div class="table-wrapper"><table><thead><tr><th>ផលិតផល</th><th>SKU</th><th>ស្តុកបច្ចុប្បន្ន</th><th>ស្តុកអប្បបរមា</th><th>សកម្មភាព</th></tr></thead><tbody id="stock-table-body"><tr><td colspan="5" style="text-align:center;">កំពុងផ្ទុក...</td></tr></tbody></table></div></div>
                 </div>
             </div>
 
-            <!-- SECTION: SETTINGS -->
             <div class="section hidden" id="section-settings">
-                <div class="dashboard-header">
-                    <h1>️ ការកំណត់</h1>
-                    <p>កំណត់ព័ត៌មានហាង និងគណនី</p>
-                </div>
+                <div class="dashboard-header"><h1>⚙️ ការកំណត់</h1><p>កំណត់ព័ត៌មានហាង និងគណនី</p></div>
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">ព័ត៌មានហាង</h3>
-                    </div>
+                    <div class="card-header"><h3 class="card-title">ព័ត៌មានហាង</h3></div>
                     <div class="card-body">
-                        <div class="form-group">
-                            <label>ឈ្មោះហាង</label>
-                            <input type="text" id="setting-store-name" class="form-control">
-                        </div>
+                        <div class="form-group"><label>ឈ្មោះហាង</label><input type="text" id="setting-store-name" class="form-control"></div>
                         <div class="form-row">
-                            <div class="form-group">
-                                <label>អ៊ីមែល</label>
-                                <input type="email" id="setting-email" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label>ទូរស័ព្ទ</label>
-                                <input type="text" id="setting-phone" class="form-control">
-                            </div>
+                            <div class="form-group"><label>អ៊ីមែល</label><input type="email" id="setting-email" class="form-control"></div>
+                            <div class="form-group"><label>ទូរស័ព្ទ</label><input type="text" id="setting-phone" class="form-control"></div>
                         </div>
-                        <div class="form-group">
-                            <label>អាសយដ្ឋាន</label>
-                            <textarea id="setting-address" class="form-control"></textarea>
-                        </div>
-                        <button class="btn btn-primary" onclick="saveSettings()">
-                            <i class="fas fa-save"></i> រក្សាទុក
-                        </button>
+                        <div class="form-group"><label>អាសយដ្ឋាន</label><textarea id="setting-address" class="form-control"></textarea></div>
+                        <button class="btn btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> រក្សាទុក</button>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- ===== MODALS ===== -->
-
-    <!-- PRODUCT MODAL -->
+    <!-- MODALS -->
     <div class="modal" id="productModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="productModalTitle">បន្ថែមផលិតផលថ្មី</h3>
-                <button class="modal-close" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="modal-header"><h3 class="modal-title" id="productModalTitle">បន្ថែមផលិតផលថ្មី</h3><button class="modal-close" onclick="closeProductModal()"><i class="fas fa-times"></i></button></div>
             <form id="productForm" onsubmit="handleProductSubmit(event)">
                 <div class="modal-body">
                     <input type="hidden" id="prodId">
-                    <div class="form-group">
-                        <label>ឈ្មោះផលិតផល *</label>
-                        <input type="text" id="prodName" class="form-control" required>
+                    <div class="form-group"><label>ឈ្មោះផលិតផល *</label><input type="text" id="prodName" class="form-control" required></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>តម្លៃលក់ ($) *</label><input type="number" step="0.01" id="prodPrice" class="form-control" required></div>
+                        <div class="form-group"><label>តម្លៃដើម ($)</label><input type="number" step="0.01" id="prodCost" class="form-control" value="0"></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>តម្លៃលក់ ($) *</label>
-                            <input type="number" step="0.01" id="prodPrice" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>តម្លៃដើម ($)</label>
-                            <input type="number" step="0.01" id="prodCost" class="form-control" value="0">
-                        </div>
+                        <div class="form-group"><label>ស្តុក *</label><input type="number" id="prodStock" class="form-control" required value="0"></div>
+                        <div class="form-group"><label>ស្តុកអប្បបរមា</label><input type="number" id="prodMinStock" class="form-control" value="5"></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>ស្តុក *</label>
-                            <input type="number" id="prodStock" class="form-control" required value="0">
-                        </div>
-                        <div class="form-group">
-                            <label>ស្តុកអប្បបរមា</label>
-                            <input type="number" id="prodMinStock" class="form-control" value="5">
-                        </div>
+                        <div class="form-group"><label>ប្រភេទ</label><input type="text" id="prodCategory" class="form-control" placeholder="ឧ. Electronics"></div>
+                        <div class="form-group"><label>SKU</label><input type="text" id="prodSku" class="form-control" placeholder="Auto-generated"></div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>បរភេទ</label>
-                            <input type="text" id="prodCategory" class="form-control" placeholder="ឧ. Electronics">
-                        </div>
-                        <div class="form-group">
-                            <label>SKU</label>
-                            <input type="text" id="prodSku" class="form-control" placeholder="Auto-generated">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>រូបភាព</label>
-                        <input type="file" id="prodImage" class="form-control" accept="image/*">
-                        <small style="color:var(--text-secondary);">PNG, JPG, GIF (Max 5MB)</small>
-                    </div>
-                    <div class="form-group">
-                        <label>ការពិពណ៌នា</label>
-                        <textarea id="prodDesc" class="form-control" rows="3"></textarea>
-                    </div>
+                    <div class="form-group"><label>រូបភាព</label><input type="file" id="prodImage" class="form-control" accept="image/*"><small style="color:var(--text-secondary);">PNG, JPG, GIF (Max 5MB)</small></div>
+                    <div class="form-group"><label>ការពិពណ៌នា</label><textarea id="prodDesc" class="form-control" rows="3"></textarea></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeProductModal()">បោះបង់</button>
@@ -490,63 +354,24 @@
         </div>
     </div>
 
-    <!-- DISCOUNT MODAL -->
     <div class="modal" id="discountModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">បង្កើតកូដបញចុះតម្លៃ</h3>
-                <button class="modal-close" onclick="closeDiscountModal()"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="modal-header"><h3 class="modal-title">បង្កើតកូដបញ្ចុះតម្លៃ</h3><button class="modal-close" onclick="closeDiscountModal()"><i class="fas fa-times"></i></button></div>
             <form id="discountForm" onsubmit="handleDiscountSubmit(event)">
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>កូដបញ្ចុះតម្លៃ *</label>
-                        <input type="text" id="discCode" class="form-control" required style="text-transform:uppercase;" placeholder="SUMMER20">
-                    </div>
-                    <div class="form-group">
-                        <label>ការពិពណ៌នា</label>
-                        <input type="text" id="discDesc" class="form-control" placeholder="Summer Sale 2024">
+                    <div class="form-group"><label>កូដបញ្ចុះតម្លៃ *</label><input type="text" id="discCode" class="form-control" required style="text-transform:uppercase;" placeholder="SUMMER20"></div>
+                    <div class="form-group"><label>ការពិពណ៌នា</label><input type="text" id="discDesc" class="form-control" placeholder="Summer Sale 2024"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>ភាគរយបញ្ចុះ (%) *</label><input type="number" id="discPercent" class="form-control" required min="1" max="100" value="10"></div>
+                        <div class="form-group"><label>ការទិញអប្បបរមា ($)</label><input type="number" id="discMinPurchase" class="form-control" value="0" step="0.01"></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>ភាគរយបញ្ចុះ (%) *</label>
-                            <input type="number" id="discPercent" class="form-control" required min="1" max="100" value="10">
-                        </div>
-                        <div class="form-group">
-                            <label>ការទិញអប្បបរមា ($)</label>
-                            <input type="number" id="discMinPurchase" class="form-control" value="0" step="0.01">
-                        </div>
+                        <div class="form-group"><label>បញ្ចុះអតិបរមា ($)</label><input type="number" id="discMaxDiscount" class="form-control" value="999999" step="0.01"></div>
+                        <div class="form-group"><label>កម្រិតប្រើប្រាស់</label><select id="discLimitType" class="form-control" onchange="toggleDiscLimit()"><option value="unlimited">គ្មានកំណត់</option><option value="fixed">កំណត់</option></select></div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>បញ្ចុះអតិបរមា ($)</label>
-                            <input type="number" id="discMaxDiscount" class="form-control" value="999999" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>កមរិតប្រើប្ាស់</label>
-                            <select id="discLimitType" class="form-control" onchange="toggleDiscLimit()">
-                                <option value="unlimited">គ្មានកំណត់</option>
-                                <option value="fixed">កំណត់</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group hidden" id="discLimitGroup">
-                        <label>ចំនួនដងដែលអាចប្រើបាន</label>
-                        <input type="number" id="discLimit" class="form-control" value="100" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label>កាលបរិចឆេទផុតកំណត់</label>
-                        <select id="discExpiryType" class="form-control" onchange="toggleDiscExpiry()">
-                            <option value="unlimited">គ្មានកំណត់</option>
-                            <option value="days">ថ្ងៃ</option>
-                            <option value="months">ខែ</option>
-                            <option value="years">ឆ្នាំ</option>
-                        </select>
-                    </div>
-                    <div class="form-group hidden" id="discExpiryGroup">
-                        <label>ចំនួន</label>
-                        <input type="number" id="discExpiryValue" class="form-control" value="30" min="1">
-                    </div>
+                    <div class="form-group hidden" id="discLimitGroup"><label>ចំនួនដងដែលអាចប្រើបាន</label><input type="number" id="discLimit" class="form-control" value="100" min="1"></div>
+                    <div class="form-group"><label>កាលបរិច្ឆេទផុតកំណត់</label><select id="discExpiryType" class="form-control" onchange="toggleDiscExpiry()"><option value="unlimited">គ្មានកំណត់</option><option value="days">ថ្ងៃ</option><option value="months">ខែ</option><option value="years">ឆ្នាំ</option></select></div>
+                    <div class="form-group hidden" id="discExpiryGroup"><label>ចំនួន</label><input type="number" id="discExpiryValue" class="form-control" value="30" min="1"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeDiscountModal()">បោះបង់</button>
@@ -556,41 +381,17 @@
         </div>
     </div>
 
-    <!-- STOCK MOVEMENT MODAL -->
     <div class="modal" id="stockModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">កែសម្រួលស្តុក</h3>
-                <button class="modal-close" onclick="closeStockModal()"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="modal-header"><h3 class="modal-title">កែសម្រួលស្តុក</h3><button class="modal-close" onclick="closeStockModal()"><i class="fas fa-times"></i></button></div>
             <form id="stockForm" onsubmit="handleStockSubmit(event)">
                 <div class="modal-body">
                     <input type="hidden" id="stockProductId">
-                    <div class="form-group">
-                        <label>ផលិតផល</label>
-                        <input type="text" id="stockProductName" class="form-control" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>ស្ុកបច្ចុប្ន្ន</label>
-                        <input type="number" id="stockCurrent" class="form-control" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>ប្រភេទចលនា *</label>
-                        <select id="stockType" class="form-control" required>
-                            <option value="purchase">ទិញចូល (+)</option>
-                            <option value="sale">លក់ចេញ (-)</option>
-                            <option value="return">ត្រឡប់មកវិញ (+)</option>
-                            <option value="adjustment">កែតម្ូវ</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>ចំនួន *</label>
-                        <input type="number" id="stockQuantity" class="form-control" required min="1" value="1">
-                    </div>
-                    <div class="form-group">
-                        <label>កំណត់ចំណាំ</label>
-                        <textarea id="stockNotes" class="form-control" rows="2"></textarea>
-                    </div>
+                    <div class="form-group"><label>ផលិតផល</label><input type="text" id="stockProductName" class="form-control" readonly></div>
+                    <div class="form-group"><label>ស្តុកបច្ចុប្បន្ន</label><input type="number" id="stockCurrent" class="form-control" readonly></div>
+                    <div class="form-group"><label>ប្រភេទចលនា *</label><select id="stockType" class="form-control" required><option value="purchase">ទិញចូល (+)</option><option value="sale">លក់ចេញ (-)</option><option value="return">ត្រឡប់មកវិញ (+)</option><option value="adjustment">កែតម្រូវ</option></select></div>
+                    <div class="form-group"><label>ចំនួន *</label><input type="number" id="stockQuantity" class="form-control" required min="1" value="1"></div>
+                    <div class="form-group"><label>កំណត់ចំណាំ</label><textarea id="stockNotes" class="form-control" rows="2"></textarea></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeStockModal()">បោះបង់</button>
@@ -600,21 +401,14 @@
         </div>
     </div>
 
-    <!-- BAN USER MODAL -->
     <div class="modal" id="banModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="banModalTitle">Ban User</h3>
-                <button class="modal-close" onclick="closeBanModal()"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="modal-header"><h3 class="modal-title" id="banModalTitle">Ban User</h3><button class="modal-close" onclick="closeBanModal()"><i class="fas fa-times"></i></button></div>
             <form id="banForm" onsubmit="handleBanSubmit(event)">
                 <div class="modal-body">
                     <input type="hidden" id="banUserId">
                     <input type="hidden" id="banAction">
-                    <div class="form-group" id="banReasonGroup">
-                        <label>មូលហេតុ</label>
-                        <textarea id="banReason" class="form-control" rows="3" placeholder="ហេតុអ្វីបានជា ban?"></textarea>
-                    </div>
+                    <div class="form-group" id="banReasonGroup"><label>មូលហេតុ</label><textarea id="banReason" class="form-control" rows="3" placeholder="ហេតុអ្វីបានជា ban?"></textarea></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeBanModal()">បោះបង់</button>
@@ -624,40 +418,487 @@
         </div>
     </div>
 
-    <!-- INVENTORY ALERTS MODAL -->
     <div class="modal" id="inventoryModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title"><i class="fas fa-box-open" style="color:var(--warning);"></i> Inventory Alerts</h3>
-                <button class="modal-close" onclick="closeInventoryModal()"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="modal-header"><h3 class="modal-title"><i class="fas fa-box-open" style="color:var(--warning);"></i> Inventory Alerts</h3><button class="modal-close" onclick="closeInventoryModal()"><i class="fas fa-times"></i></button></div>
             <div class="modal-body" id="inventory-list"></div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeInventoryModal()">Close</button>
-            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeInventoryModal()">Close</button></div>
         </div>
     </div>
 
-    <!-- INVOICE PRINT TEMPLATE (Hidden) -->
     <div id="invoice-print" style="display:none;">
         <div style="padding:20px; font-family:Arial, sans-serif;">
-            <div style="text-align:center; margin-bottom:30px;">
-                <h1 style="color:#6366f1;">AnajakCode Shop</h1>
-                <p>Invoice</p>
-            </div>
+            <div style="text-align:center; margin-bottom:30px;"><h1 style="color:#6366f1;">AnajakCode Shop</h1><p>Invoice</p></div>
             <div id="invoice-content"></div>
-            <div style="margin-top:40px; text-align:center; font-size:12px; color:#666;">
-                <p>Thank you for your purchase!</p>
-            </div>
+            <div style="margin-top:40px; text-align:center; font-size:12px; color:#666;"><p>Thank you for your purchase!</p></div>
         </div>
     </div>
 
-    <!-- KEYBOARD SHORTCUTS HINT -->
     <div class="shortcut-hint">
         <kbd>Ctrl+K</kbd> Search &nbsp; <kbd>Ctrl+N</kbd> New Product &nbsp; <kbd>Esc</kbd> Close &nbsp; <kbd>Alt+D</kbd> Dashboard
     </div>
 
-    <!-- Custom JS -->
-    <script src="scrip_function.js"></script>
+    <!-- Embedded JavaScript -->
+    <script>
+        const API_URL = 'https://api.anajakcode.site/api'; // ⚠️ កែ URL នេះតាម Backend របស់អ្នក
+        let revenueChart = null;
+        let realtimeInterval = null;
+
+        function getToken() { return localStorage.getItem('admin_token'); }
+        function setToken(token) { localStorage.setItem('admin_token', token); }
+        function clearToken() { localStorage.removeItem('admin_token'); }
+
+        if (!getToken()) { window.location.href = 'loginadmin.html'; }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Admin Dashboard initializing... API:', API_URL);
+            initNavigation(); initTheme(); initDashboard(); setupKeyboardShortcuts(); setupModalCloseHandlers();
+        });
+
+        function initNavigation() {
+            document.querySelectorAll('.menu-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = link.dataset.section;
+                    switchSection(section);
+                    document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    document.getElementById('sidebar').classList.remove('mobile-open');
+                });
+            });
+            const toggleBtn = document.getElementById('toggleSidebar');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) document.getElementById('sidebar').classList.toggle('mobile-open');
+                    else document.getElementById('sidebar').classList.toggle('collapsed');
+                });
+            }
+            document.addEventListener('click', (e) => {
+                const sidebar = document.getElementById('sidebar');
+                const menuBtn = document.querySelector('.toggle-sidebar');
+                if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+        }
+
+        function switchSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(`section-${sectionId}`);
+            if (target) target.classList.add('active');
+            if (sectionId === 'dashboard') { loadDashboard(); startRealtimeMonitoring(); }
+            else if (sectionId === 'products') loadProducts();
+            else if (sectionId === 'orders') loadOrders();
+            else if (sectionId === 'users') loadUsers();
+            else if (sectionId === 'discounts') loadDiscounts();
+            else if (sectionId === 'stock') loadStock();
+            else if (sectionId === 'settings') loadSettings();
+            clearInterval(realtimeInterval);
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('theme', next);
+                });
+            }
+        }
+
+        async function fetchWithAuth(url, options = {}) {
+            const headers = { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json', ...(options.headers || {}) };
+            try {
+                const response = await fetch(url, { ...options, headers });
+                if (response.status === 401) { clearToken(); window.location.href = 'loginadmin.html'; return null; }
+                return response;
+            } catch (error) { console.error('Fetch error:', error); showToast('Connection failed', 'error'); return null; }
+        }
+
+        function showToast(message, type = 'success', title = '') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const icons = { success: 'fa-check', error: 'fa-times', warning: 'fa-exclamation' };
+            const defaultTitles = { success: 'Success', error: 'Error', warning: 'Warning' };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<div class="toast-icon"><i class="fas ${icons[type] || icons.success}"></i></div><div class="toast-content"><div class="toast-title">${title || defaultTitles[type]}</div><div class="toast-message">${message}</div></div><button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.add('removing'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        async function initDashboard() { await loadDashboard(); }
+        async function loadDashboard() {
+            try {
+                const res = await fetchWithAuth(`${API_URL}/admin/stats`);
+                if (!res) return;
+                const stats = await res.json();
+                document.getElementById('stat-revenue').innerText = `$${stats.total_revenue.toLocaleString()}`;
+                document.getElementById('stat-orders').innerText = stats.total_orders;
+                document.getElementById('stat-products').innerText = stats.total_products;
+                document.getElementById('stat-users').innerText = stats.total_users;
+                const pendingBadge = document.getElementById('pending-orders-badge');
+                if (pendingBadge) pendingBadge.innerText = stats.pending_orders || 0;
+                const notifBadge = document.getElementById('notif-badge');
+                if (notifBadge) {
+                    const total = (stats.low_stock_count || 0) + (stats.pending_orders || 0);
+                    notifBadge.innerText = total;
+                    notifBadge.style.display = total > 0 ? 'flex' : 'none';
+                }
+                await loadChart();
+            } catch (err) { console.error('Dashboard load error:', err); }
+        }
+
+        async function loadChart() {
+            try {
+                const res = await fetchWithAuth(`${API_URL}/admin/order-analytics`);
+                if (!res) return;
+                const data = await res.json();
+                const ctx = document.getElementById('revenueChart');
+                if (!ctx) return;
+                if (revenueChart) revenueChart.destroy();
+                revenueChart = new Chart(ctx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            { label: 'Orders', data: data.order_counts, borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#6366f1' },
+                            { label: 'Revenue ($)', data: data.revenues, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.05)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#10b981' }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', align: 'end' } }, scales: { y: { beginAtZero: true } } }
+                });
+            } catch (err) { console.error('Chart load error:', err); }
+        }
+
+        async function refreshChart() { showToast('Refreshing chart...', 'warning', 'Loading'); await loadChart(); }
+
+        function startRealtimeMonitoring() {
+            async function fetchStatus() {
+                try {
+                    const res = await fetchWithAuth(`${API_URL}/admin/realtime-status`);
+                    if (!res) return;
+                    const data = await res.json();
+                    const rtActive = document.getElementById('rt-active');
+                    const rtNewUsers = document.getElementById('rt-new-users');
+                    const rtNewOrders = document.getElementById('rt-new-orders');
+                    const rtLowStock = document.getElementById('rt-low-stock');
+                    const lastUpdate = document.getElementById('lastUpdate');
+                    if (rtActive) rtActive.innerText = data.active_orders;
+                    if (rtNewUsers) rtNewUsers.innerText = data.new_users_today;
+                    if (rtNewOrders) rtNewOrders.innerText = data.new_orders_today;
+                    if (rtLowStock) rtLowStock.innerText = data.low_stock_count;
+                    if (lastUpdate) lastUpdate.innerText = 'Updated just now';
+                } catch (e) { console.error('Realtime error:', e); }
+            }
+            fetchStatus();
+            clearInterval(realtimeInterval);
+            realtimeInterval = setInterval(fetchStatus, 10000);
+        }
+
+        async function loadProducts() {
+            try {
+                const res = await fetch(`${API_URL}/products`);
+                const data = await res.json();
+                const tbody = document.getElementById('product-table-body');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                const products = data.products || data || [];
+                if (products.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No products found</td></tr>'; return; }
+                products.forEach(p => {
+                    const imgUrl = p.image_url ? `${API_URL}${p.image_url}` : 'https://via.placeholder.com/50';
+                    const stockColor = p.stock <= (p.min_stock || 5) ? 'var(--danger)' : 'var(--success)';
+                    tbody.innerHTML += `<tr><td><img src="${imgUrl}" class="product-img" onerror="this.src='https://via.placeholder.com/50'"></td><td><strong>${p.name}</strong><br><small style="color:var(--text-secondary);">${p.sku || '-'}</small></td><td>$${p.price}</td><td><span style="color:${stockColor}; font-weight:600;">${p.stock}</span></td><td>${p.category || '-'}</td><td><button class="btn btn-sm btn-primary" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`;
+                });
+            } catch (err) { console.error('Products load error:', err); showToast('Failed to load products', 'error'); }
+        }
+
+        function openProductModal() { document.getElementById('productModalTitle').innerText = 'បន្ថែមផលិតផលថ្មី'; document.getElementById('productForm').reset(); document.getElementById('prodId').value = ''; document.getElementById('productModal').classList.add('active'); }
+        function closeProductModal() { document.getElementById('productModal').classList.remove('active'); }
+
+        async function editProduct(id) {
+            try {
+                const res = await fetchWithAuth(`${API_URL}/products/${id}`);
+                if (!res) return;
+                const p = await res.json();
+                document.getElementById('productModalTitle').innerText = 'កែសម្រួលផលិតផល';
+                document.getElementById('prodId').value = p.id;
+                document.getElementById('prodName').value = p.name;
+                document.getElementById('prodPrice').value = p.price;
+                document.getElementById('prodCost').value = p.cost_price || 0;
+                document.getElementById('prodStock').value = p.stock;
+                document.getElementById('prodMinStock').value = p.min_stock || 5;
+                document.getElementById('prodCategory').value = p.category || '';
+                document.getElementById('prodSku').value = p.sku || '';
+                document.getElementById('prodDesc').value = p.description || '';
+                document.getElementById('productModal').classList.add('active');
+            } catch (err) { showToast('Failed to load product', 'error'); }
+        }
+
+        async function handleProductSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('prodId').value;
+            const fileInput = document.getElementById('prodImage');
+            let imageUrl = '';
+            if (fileInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                try {
+                    const res = await fetch(`${API_URL}/admin/upload`, { method: 'POST', headers: { 'Authorization': `Bearer ${getToken()}` }, body: formData });
+                    const data = await res.json();
+                    if (data.url) imageUrl = data.url;
+                } catch (err) { console.error('Upload error:', err); }
+            }
+            const productData = { name: document.getElementById('prodName').value, price: parseFloat(document.getElementById('prodPrice').value), cost_price: parseFloat(document.getElementById('prodCost').value) || 0, stock: parseInt(document.getElementById('prodStock').value), min_stock: parseInt(document.getElementById('prodMinStock').value) || 5, category: document.getElementById('prodCategory').value, sku: document.getElementById('prodSku').value, description: document.getElementById('prodDesc').value, image_url: imageUrl };
+            try {
+                if (id) { await fetchWithAuth(`${API_URL}/admin/products/${id}`, { method: 'PUT', body: JSON.stringify(productData) }); showToast('ផលិតផលត្រូវបានកែសម្រួល!', 'success'); }
+                else { await fetchWithAuth(`${API_URL}/admin/products`, { method: 'POST', body: JSON.stringify(productData) }); showToast('ផលិតផលត្រូវបានបន្ថែម!', 'success'); }
+                closeProductModal(); loadProducts();
+            } catch (err) { showToast('មានកំហុសក្នុងការរក្សាទុក', 'error'); }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('តើអ្នកប្រាកដជាចង់លុបផលិតផលនេះ?')) return;
+            try { await fetchWithAuth(`${API_URL}/admin/products/${id}`, { method: 'DELETE' }); showToast('ផលិតផលត្រូវបានលុប!', 'success'); loadProducts(); }
+            catch (err) { showToast('មានកំហុសក្នុងការលុប', 'error'); }
+        }
+
+        async function loadOrders() {
+            try {
+                const res = await fetchWithAuth(`${API_URL}/admin/orders`);
+                if (!res) return;
+                const data = await res.json();
+                const tbody = document.getElementById('order-table-body');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                const orders = data.orders || data || [];
+                if (orders.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No orders yet</td></tr>'; return; }
+                orders.forEach(o => {
+                    const statusClass = o.status || 'pending';
+                    tbody.innerHTML += `<tr><td><strong>#${o.order_number || o.id}</strong></td><td><div class="customer-cell"><div class="customer-avatar" style="background:linear-gradient(135deg,#6366f1,#818cf8);">${(o.customer_name || '?').charAt(0).toUpperCase()}</div><div><div class="customer-name">${o.customer_name}</div><div class="customer-email">${o.customer_email}</div></div></div></td><td><strong>$${o.total_price}</strong></td><td><span class="status-badge ${statusClass}">${statusClass}</span></td><td>${new Date(o.created_at).toLocaleDateString()}</td><td><button class="btn btn-sm btn-primary" onclick="viewOrder(${o.id})"><i class="fas fa-eye"></i></button><button class="btn btn-sm btn-success" onclick="printInvoice(${o.id})"><i class="fas fa-print"></i></button></td></tr>`;
+                });
+            } catch (err) { console.error('Orders load error:', err); }
+        }
+
+        async function viewOrder(id) {
+            try {
+                const res = await fetchWithAuth(`${API_URL}/admin/orders/${id}`);
+                if (!res) return;
+                const order = await res.json();
+                const itemsList = order.items.map(i => `- ${i.product_name} x${i.quantity} = $${i.subtotal}`).join('\n');
+                alert(`Order #${order.order_number}\nCustomer: ${order.customer_name}\nTotal: $${order.total_price}\nStatus: ${order.status}\n\nItems:\n${itemsList}`);
+            } catch (err) { showToast('Failed to load order', 'error'); }
+        }
+
+        async function printInvoice(id) {
+            try {
+                const res = await fetchWithAuth(`${API_URL}/admin/orders/${id}`);
+                if (!res) return;
+                const order = await res.json();
+                const content = document.getElementById('invoice-content');
+                if (!content) return;
+                content.innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:20px;"><div><strong>Invoice #:</strong> ${order.order_number || order.id}<br><strong>Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</div><div style="text-align:right;"><strong>Customer:</strong><br>${order.customer_name}<br>${order.customer_email}<br>${order.customer_phone || ''}</div></div><table style="width:100%; border-collapse:collapse; margin:20px 0;"><thead><tr style="background:#f1f5f9;"><th style="padding:10px; text-align:left;">Product</th><th style="padding:10px;">Qty</th><th style="padding:10px;">Price</th><th style="padding:10px;">Subtotal</th></tr></thead><tbody>${order.items.map(i => `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:10px;">${i.product_name}</td><td style="padding:10px; text-align:center;">${i.quantity}</td><td style="padding:10px; text-align:right;">$${i.price}</td><td style="padding:10px; text-align:right;">$${i.subtotal}</td></tr>`).join('')}</tbody></table><div style="text-align:right; font-size:18px; margin-top:20px;">${order.discount_code ? `<p>Discount (${order.discount_code}): -$${order.discount_amount}</p>` : ''}<p><strong>Total: $${order.total_price}</strong></p><p style="font-size:14px;">Status: ${order.status} | Payment: ${order.payment_status}</p></div>`;
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.write(`<html><head><title>Invoice #${order.order_number || order.id}</title></head><body>${document.getElementById('invoice-print').innerHTML}</body></html>`);
+                    printWindow.document.close();
+                    printWindow.print();
+                }
+            } catch (err) { showToast('Failed to print invoice', 'error'); }
+        }
+
+        async function loadUsers() {
+            try {
+                const res = await fetchWithAuth(`${API_URL}/admin/users`);
+                if (!res) return;
+                const data = await res.json();
+                const tbody = document.getElementById('user-table-body');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                const users = data.users || data || [];
+                if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No users registered yet.</td></tr>'; return; }
+                users.forEach(u => {
+                    const statusClass = u.is_banned ? 'banned' : 'active';
+                    const statusText = u.is_banned ? 'Banned' : 'Active';
+                    const actionBtn = u.is_banned ? `<button class="btn btn-sm btn-success" onclick="openBanModal(${u.id}, '${u.name}', false)"><i class="fas fa-unlock"></i> Unban</button>` : `<button class="btn btn-sm btn-danger" onclick="openBanModal(${u.id}, '${u.name}', true)"><i class="fas fa-ban"></i> Ban</button>`;
+                    tbody.innerHTML += `<tr><td><div class="customer-cell"><div class="customer-avatar" style="background:linear-gradient(135deg,#6366f1,#818cf8);">${(u.name || '?').charAt(0).toUpperCase()}</div><strong>${u.name}</strong></div></td><td>${u.email}</td><td><span class="status-badge active">${u.role}</span></td><td><span class="status-badge ${statusClass}">${statusText}</span></td><td>${actionBtn}</td></tr>`;
+                });
+            } catch (err) { console.error('Users load error:', err); }
+        }
+
+        function openBanModal(userId, userName, isBan) {
+            document.getElementById('banUserId').value = userId;
+            document.getElementById('banAction').value = isBan ? 'ban' : 'unban';
+            document.getElementById('banModalTitle').innerText = isBan ? `Ban ${userName}` : `Unban ${userName}`;
+            document.getElementById('banReasonGroup').style.display = isBan ? 'block' : 'none';
+            document.getElementById('banSubmitBtn').innerHTML = isBan ? '<i class="fas fa-ban"></i> Ban' : '<i class="fas fa-unlock"></i> Unban';
+            document.getElementById('banSubmitBtn').className = isBan ? 'btn btn-danger' : 'btn btn-success';
+            document.getElementById('banModal').classList.add('active');
+        }
+        function closeBanModal() { document.getElementById('banModal').classList.remove('active'); }
+
+        async function handleBanSubmit(e) {
+            e.preventDefault();
+            const userId = document.getElementById('banUserId').value;
+            const action = document.getElementById('banAction').value;
+            const reason = document.getElementById('banReason').value;
+            try {
+                await fetchWithAuth(`${API_URL}/admin/users/${userId}`, { method: 'PUT', body: JSON.stringify({ is_banned: action === 'ban', banned_reason: reason }) });
+                showToast(action === 'ban' ? 'User banned!' : 'User unbanned!', 'success');
+                closeBanModal(); loadUsers();
+            } catch (err) { showToast('Failed to update user', 'error'); }
+        }
+
+        async function loadDiscounts() {
+            try {
+                const res = await fetchWithAuth(`${API_URL}/admin/discounts`);
+                if (!res) return;
+                const data = await res.json();
+                const tbody = document.getElementById('discount-table-body');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No discount codes yet</td></tr>'; return; }
+                data.forEach(d => {
+                    const statusClass = d.is_expired || !d.is_active ? 'cancelled' : 'active';
+                    const statusText = d.is_expired ? 'Expired' : (!d.is_active ? 'Inactive' : 'Active');
+                    tbody.innerHTML += `<tr><td><strong style="color:var(--primary); font-family:monospace;">${d.code}</strong></td><td>${d.description || '-'}</td><td>${d.percent}%</td><td>${d.used} / ${d.limit === 999999 ? '∞' : d.limit}</td><td><span class="status-badge ${statusClass}">${statusText}</span></td><td><button class="btn btn-sm btn-danger" onclick="deleteDiscount(${d.id})"><i class="fas fa-trash"></i></button></td></tr>`;
+                });
+            } catch (err) { console.error('Discounts load error:', err); }
+        }
+
+        function openDiscountModal() { document.getElementById('discountForm').reset(); document.getElementById('discLimitGroup').style.display = 'none'; document.getElementById('discExpiryGroup').style.display = 'none'; document.getElementById('discountModal').classList.add('active'); }
+        function closeDiscountModal() { document.getElementById('discountModal').classList.remove('active'); }
+        function toggleDiscLimit() { document.getElementById('discLimitGroup').style.display = document.getElementById('discLimitType').value === 'fixed' ? 'block' : 'none'; }
+        function toggleDiscExpiry() { document.getElementById('discExpiryGroup').style.display = document.getElementById('discExpiryType').value === 'unlimited' ? 'none' : 'block'; }
+
+        async function handleDiscountSubmit(e) {
+            e.preventDefault();
+            const data = { code: document.getElementById('discCode').value.toUpperCase(), description: document.getElementById('discDesc').value, percent: parseFloat(document.getElementById('discPercent').value), min_purchase: parseFloat(document.getElementById('discMinPurchase').value) || 0, max_discount: parseFloat(document.getElementById('discMaxDiscount').value) || 999999, limit_type: document.getElementById('discLimitType').value, limit: document.getElementById('discLimitType').value === 'fixed' ? parseInt(document.getElementById('discLimit').value) : 999999, expiry_type: document.getElementById('discExpiryType').value, expiry_value: document.getElementById('discExpiryType').value !== 'unlimited' ? parseInt(document.getElementById('discExpiryValue').value) : null };
+            try {
+                await fetchWithAuth(`${API_URL}/admin/discounts`, { method: 'POST', body: JSON.stringify(data) });
+                showToast('កូដបញ្ចុះតម្លៃត្រូវបានបង្កើត!', 'success');
+                closeDiscountModal(); loadDiscounts();
+            } catch (err) { showToast('មានកំហុសក្នុងការបង្កើតកូដ', 'error'); }
+        }
+
+        async function deleteDiscount(id) {
+            if (!confirm('តើអ្នកប្រាកដជាចង់លុបកូដនេះ?')) return;
+            try { await fetchWithAuth(`${API_URL}/admin/discounts/${id}`, { method: 'DELETE' }); showToast('កូដត្រូវបានលុប!', 'success'); loadDiscounts(); }
+            catch (err) { showToast('មានកំហុសក្នុងការលុប', 'error'); }
+        }
+
+        async function loadStock() {
+            try {
+                const res = await fetch(`${API_URL}/products`);
+                const data = await res.json();
+                const tbody = document.getElementById('stock-table-body');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                const products = data.products || data || [];
+                let total = 0, low = 0, ok = 0;
+                if (products.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No products</td></tr>'; return; }
+                products.forEach(p => {
+                    total++;
+                    if (p.stock <= (p.min_stock || 5)) low++; else ok++;
+                    const stockColor = p.stock <= (p.min_stock || 5) ? 'var(--danger)' : 'var(--success)';
+                    tbody.innerHTML += `<tr><td><strong>${p.name}</strong></td><td><code>${p.sku || '-'}</code></td><td><span style="color:${stockColor}; font-weight:700; font-size:16px;">${p.stock}</span></td><td>${p.min_stock || 5}</td><td><button class="btn btn-sm btn-primary" onclick="openStockModal(${p.id}, '${p.name}', ${p.stock})"><i class="fas fa-edit"></i> កែស្តុក</button></td></tr>`;
+                });
+                const stockTotal = document.getElementById('stock-total');
+                const stockLow = document.getElementById('stock-low');
+                const stockOk = document.getElementById('stock-ok');
+                if (stockTotal) stockTotal.innerText = total;
+                if (stockLow) stockLow.innerText = low;
+                if (stockOk) stockOk.innerText = ok;
+            } catch (err) { console.error('Stock load error:', err); }
+        }
+
+        function openStockModal(productId, productName, currentStock) {
+            document.getElementById('stockProductId').value = productId;
+            document.getElementById('stockProductName').value = productName;
+            document.getElementById('stockCurrent').value = currentStock;
+            document.getElementById('stockForm').reset();
+            document.getElementById('stockProductId').value = productId;
+            document.getElementById('stockProductName').value = productName;
+            document.getElementById('stockCurrent').value = currentStock;
+            document.getElementById('stockModal').classList.add('active');
+        }
+        function closeStockModal() { document.getElementById('stockModal').classList.remove('active'); }
+
+        async function handleStockSubmit(e) {
+            e.preventDefault();
+            const productId = document.getElementById('stockProductId').value;
+            const type = document.getElementById('stockType').value;
+            let quantity = parseInt(document.getElementById('stockQuantity').value);
+            if (type === 'sale') quantity = -quantity;
+            const data = { product_id: parseInt(productId), quantity: quantity, movement_type: type, notes: document.getElementById('stockNotes').value, created_by: 'Admin' };
+            try {
+                await fetchWithAuth(`${API_URL}/admin/stock-movements`, { method: 'POST', body: JSON.stringify(data) });
+                showToast('ស្តុកត្រូវបានកែសម្រួល!', 'success');
+                closeStockModal(); loadStock();
+            } catch (err) { showToast('មានកំហុសក្នុងការកែស្តុក', 'error'); }
+        }
+
+        async function loadSettings() {
+            try {
+                const res = await fetchWithAuth(`${API_URL}/admin/settings`);
+                if (!res) return;
+                const data = await res.json();
+                const storeName = document.getElementById('setting-store-name');
+                const email = document.getElementById('setting-email');
+                const phone = document.getElementById('setting-phone');
+                const address = document.getElementById('setting-address');
+                if (storeName) storeName.value = data.store_name || '';
+                if (email) email.value = data.admin_email || '';
+                if (phone) phone.value = data.phone || '';
+                if (address) address.value = data.address || '';
+            } catch (err) { console.error('Settings load error:', err); }
+        }
+
+        async function saveSettings() {
+            const data = { store_name: document.getElementById('setting-store-name').value, admin_email: document.getElementById('setting-email').value, phone: document.getElementById('setting-phone').value, address: document.getElementById('setting-address').value };
+            try { await fetchWithAuth(`${API_URL}/admin/settings`, { method: 'PUT', body: JSON.stringify(data) }); showToast('ការកំណត់ត្រូវបានរក្សាទុក!', 'success'); }
+            catch (err) { showToast('មានកំហុសក្នុងការរក្សាទុក', 'error'); }
+        }
+
+        function showInventoryAlerts() {
+            fetchWithAuth(`${API_URL}/admin/inventory-alerts`).then(res => res ? res.json() : null).then(alerts => {
+                if (!alerts) return;
+                const list = document.getElementById('inventory-list');
+                if (!list) return;
+                if (alerts.length === 0) { list.innerHTML = '<p style="text-align:center; color:var(--text-secondary); padding:20px;"><i class="fas fa-check-circle" style="color:var(--success); font-size:40px; margin-bottom:10px; display:block;"></i>All products are well stocked!</p>'; }
+                else {
+                    list.innerHTML = alerts.map(a => `<div style="display:flex; align-items:center; gap:12px; padding:12px; border:1px solid var(--border); border-radius:8px; margin-bottom:8px; background:${a.status === 'Out of Stock' ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)'};"><div style="width:40px; height:40px; border-radius:8px; background:${a.status === 'Out of Stock' ? 'var(--danger)' : 'var(--warning)'}; color:white; display:flex; align-items:center; justify-content:center;"><i class="fas fa-${a.status === 'Out of Stock' ? 'times' : 'exclamation'}"></i></div><div style="flex:1;"><div style="font-weight:600;">${a.name}</div><div style="font-size:12px; color:var(--text-secondary);">${a.status} - ${a.stock} left</div></div></div>`).join('');
+                }
+                document.getElementById('inventoryModal').classList.add('active');
+            });
+        }
+        function closeInventoryModal() { document.getElementById('inventoryModal').classList.remove('active'); }
+
+        function handleLogout() {
+            if (!confirm('តើអ្នកប្រាកដជាចង់ចាកចេញ?')) return;
+            clearToken();
+            window.location.href = 'loginadmin.html';
+        }
+
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); showToast('Search feature coming soon!', 'warning', 'Shortcut'); }
+                if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); const productsSection = document.getElementById('section-products'); if (productsSection && productsSection.classList.contains('active')) { openProductModal(); } else { switchSection('products'); setTimeout(openProductModal, 100); } }
+                if (e.key === 'Escape') { closeProductModal(); closeDiscountModal(); closeInventoryModal(); closeStockModal(); closeBanModal(); }
+                if (e.altKey && e.key === 'd') { e.preventDefault(); switchSection('dashboard'); }
+            });
+        }
+
+        function setupModalCloseHandlers() {
+            document.querySelectorAll('.modal').forEach(m => { m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('active'); }); });
+        }
+
+        window.addEventListener('error', function(e) { console.error('Global error:', e.error); });
+        window.addEventListener('unhandledrejection', function(e) { console.error('Unhandled promise rejection:', e.reason); });
+    </script>
 </body>
 </html>
