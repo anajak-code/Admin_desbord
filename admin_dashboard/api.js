@@ -1,6 +1,11 @@
-// api.js
+// ============================================
+// API CONFIGURATION
+// ============================================
 const API_URL = 'https://api.anajakcode.site/api';
 
+// ============================================
+// AUTH HELPERS
+// ============================================
 function getToken() { 
     return localStorage.getItem('admin_token'); 
 }
@@ -18,11 +23,14 @@ if (!getToken() && !window.location.pathname.includes('login')) {
     window.location.href = 'login/index.html';
 }
 
+// ============================================
+// FETCH WITH AUTH
+// ============================================
 async function fetchWithAuth(url, options = {}) {
     const token = getToken();
     
-    console.log('🔑 Token:', token ? 'Present' : 'Missing');
-    console.log(' Fetching:', url);
+    console.log(' Token:', token ? '✅ Present' : '❌ Missing');
+    console.log('📡 Fetching:', url);
     
     const headers = { 
         'Content-Type': 'application/json',
@@ -52,4 +60,28 @@ async function fetchWithAuth(url, options = {}) {
         showToast('Connection failed', 'error');
         return null;
     }
-            }
+}
+
+// ============================================
+// TOAST NOTIFICATIONS
+// ============================================
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) {
+        alert(message);
+        return;
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <div class="toast-content">
+            <div class="toast-message">${message}</div>
+        </div>
+    `;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
