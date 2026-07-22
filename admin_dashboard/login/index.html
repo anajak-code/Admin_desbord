@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | AnajakCode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%); padding: 20px; }
+        .box { background: white; border-radius: 24px; width: 100%; max-width: 420px; box-shadow: 0 25px 60px rgba(0,0,0,0.3); overflow: hidden; animation: up 0.5s ease; }
+        @keyframes up { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .head { text-align: center; padding: 36px 24px 20px; }
+        .logo { width: 70px; height: 70px; margin: 0 auto 16px; background: linear-gradient(135deg, #6366f1, #ec4899); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; box-shadow: 0 10px 25px rgba(99,102,241,0.4); }
+        h1 { font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .sub { color: #64748b; font-size: 14px; }
+        .form { padding: 24px; }
+        .fg { margin-bottom: 16px; }
+        .fg label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #334155; }
+        .fg input { width: 100%; padding: 13px 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; transition: all 0.3s; background: #f8fafc; }
+        .fg input:focus { outline: none; border-color: #6366f1; background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(99,102,241,0.4); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .msg { text-align: center; margin-top: 12px; font-size: 13px; font-weight: 600; min-height: 18px; }
+        .msg.err { color: #ef4444; } .msg.ok { color: #10b981; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="head">
+            <div class="logo"><i class="fas fa-bolt"></i></div>
+            <h1>AnajakCode</h1>
+            <p class="sub">សូមស្វាគមន៍! ចូលប្ើគណនីរបស់អ្នក</p>
+        </div>
+        <form class="form" id="loginForm" onsubmit="doLogin(event)">
+            <div class="fg"><label>អ៊ីមែល</label><input type="email" id="liEmail" required placeholder="you@example.com"></div>
+            <div class="fg"><label>ពាក្យសម្ងាត់</label><input type="password" id="liPass" required placeholder="••••••••"></div>
+            <button type="submit" class="btn" id="liBtn">ចូលប្រើ</button>
+            <div class="msg" id="liMsg"></div>
+        </form>
+    </div>
+    <script src="../api.js"></script>
+    <script>
+        async function doLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('liBtn');
+            const msg = document.getElementById('liMsg');
+            btn.disabled = true; btn.innerText = 'កំពុងចូល...'; msg.innerText = '';
+            try {
+                const res = await fetch(`${API_URL}/admin/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: document.getElementById('liPass').value })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('admin_token', data.token);
+                    msg.className = 'msg ok'; msg.innerText = '✅ ចូលប្រើជោគជ័យ!';
+                    setTimeout(() => window.location.href = '../index.html', 800);
+                } else {
+                    msg.className = 'msg err'; msg.innerText = '❌ ' + (data.error || 'ពាក្យសម្ងាត់មិនត្រូវ');
+                    btn.disabled = false; btn.innerText = 'ចូលប្រើ';
+                }
+            } catch (err) {
+                msg.className = 'msg err'; msg.innerText = '❌ មានបញ្ហាភ្ជាប់';
+                btn.disabled = false; btn.innerText = 'ចូលប្រើ';
+            }
+        }
+    </script>
+</body>
+</html>
