@@ -3,15 +3,6 @@
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Auth check
-    if (!checkAuth()) return;
-
-    // Display user info
-    const user = getUserInfo();
-    if (user) {
-        document.getElementById('admin-name').textContent = user.name || 'Admin';
-    }
-
     // Init navigation
     initNavigation();
 
@@ -372,7 +363,6 @@ async function deleteUser(id, name) {
 // SETTINGS
 // ============================================
 function loadSettings() {
-    // Load saved settings from localStorage
     const settings = JSON.parse(localStorage.getItem('shop_settings') || '{}');
     if (settings.shop_name) document.getElementById('set-shop-name').value = settings.shop_name;
     if (settings.shop_email) document.getElementById('set-shop-email').value = settings.shop_email;
@@ -414,12 +404,10 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Mobile sidebar toggle
 function toggleSidebar() {
     document.querySelector('.sidebar').classList.toggle('open');
 }
 
-// Close modal on overlay click
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
         e.target.classList.remove('show');
