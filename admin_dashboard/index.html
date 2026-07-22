@@ -1,86 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="km">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>AnajakCode Admin</title>
     <link rel="stylesheet" href="./theme/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Toast Notifications -->
+    <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Mobile Toggle -->
-    <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+    <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
 
     <div class="app-container">
-        <!-- ===== SIDEBAR ===== -->
-        <aside class="sidebar">
+        <!-- SIDEBAR -->
+        <aside class="sidebar glass">
             <div class="sidebar-header">
-                <span class="logo">⚡</span>
-                <h2>ShopAdmin</h2>
+                <span class="logo-icon">⚡</span>
+                <h2>AnajakCode</h2>
             </div>
 
             <ul class="nav-menu">
                 <li class="nav-item active" data-section="overview">
-                    <span class="icon">📊</span> Overview
+                    <i class="fas fa-chart-pie"></i> Overview
                 </li>
                 <li class="nav-item" data-section="products">
-                    <span class="icon">📦</span> Products
+                    <i class="fas fa-box-open"></i> Products
                 </li>
                 <li class="nav-item" data-section="orders">
-                    <span class="icon">🛒</span> Orders
+                    <i class="fas fa-shopping-cart"></i> Orders
                 </li>
                 <li class="nav-item" data-section="users">
-                    <span class="icon">👥</span> Users
+                    <i class="fas fa-users"></i> Users
                 </li>
                 <li class="nav-item" data-section="settings">
-                    <span class="icon">⚙️</span> Settings
+                    <i class="fas fa-cog"></i> Settings
                 </li>
             </ul>
 
             <div class="sidebar-footer">
-                <button class="btn-logout" onclick="logout()">🚪 Log Out</button>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Log Out
+                </button>
             </div>
         </aside>
 
-        <!-- ===== MAIN CONTENT ===== -->
+        <!-- MAIN CONTENT -->
         <main class="main-content">
             <div class="page-header">
                 <h1 id="page-title">Overview</h1>
-                <p>Welcome to Admin Dashboard</p>
+                <p>Welcome back, Administrator</p>
             </div>
 
-            <!-- ---- OVERVIEW SECTION ---- -->
+            <!-- 1. OVERVIEW SECTION -->
             <div id="section-overview" class="section active">
+                <!-- Stat Cards -->
                 <div id="stats-grid" class="stats-grid">
                     <div class="loading"><div class="spinner"></div>Loading stats...</div>
                 </div>
-                
-                <div class="chart-container">
-                    <div class="card-header">
-                        <h3>📈 Orders This Week</h3>
+
+                <!-- Charts & Widgets -->
+                <div class="dashboard-widgets">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Revenue Analytics</h3>
+                        </div>
+                        <canvas id="revenueChart"></canvas>
                     </div>
-                    <div id="chart-area"></div>
+                    
+                    <div class="card recent-orders-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-clock"></i> Recent Orders</h3>
+                        </div>
+                        <div id="recent-orders-list" class="list-container">
+                            <div class="loading"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Low Stock Alerts -->
+                <div class="card alert-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-exclamation-triangle text-warning"></i> Low Stock Alerts</h3>
+                    </div>
+                    <div id="low-stock-list" class="list-container">
+                        <p class="empty-state-text">No low stock items</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- ---- PRODUCTS SECTION ---- -->
+            <!-- 6-9, 11. PRODUCTS SECTION -->
             <div id="section-products" class="section">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header actions-header">
                         <h3>All Products</h3>
-                        <button class="btn btn-primary" onclick="openAddProductModal()">+ Add Product</button>
+                        <div class="header-actions">
+                            <input type="text" id="product-search" placeholder="Search products..." class="search-input">
+                            <button class="btn btn-primary" onclick="openProductModal()">
+                                <i class="fas fa-plus"></i> Add Product
+                            </button>
+                        </div>
                     </div>
+                    
+                    <!-- Bulk Actions Bar -->
+                    <div id="bulk-actions-bar" class="bulk-bar hidden">
+                        <span id="selected-count">0 selected</span>
+                        <button class="btn btn-danger btn-sm" onclick="bulkDeleteProducts()">
+                            <i class="fas fa-trash"></i> Delete Selected
+                        </button>
+                    </div>
+
                     <div class="table-wrapper">
                         <table>
                             <thead>
                                 <tr>
+                                    <th width="40"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"></th>
                                     <th>ID</th>
                                     <th>Product</th>
                                     <th>Price</th>
                                     <th>Stock</th>
-                                    <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -92,7 +134,7 @@
                 </div>
             </div>
 
-            <!-- ---- ORDERS SECTION ---- -->
+            <!-- 13, 15. ORDERS SECTION -->
             <div id="section-orders" class="section">
                 <div class="card">
                     <div class="card-header">
@@ -104,10 +146,10 @@
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Customer</th>
-                                    <th>Items</th>
                                     <th>Total</th>
                                     <th>Status</th>
                                     <th>Date</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="orders-tbody">
@@ -118,7 +160,7 @@
                 </div>
             </div>
 
-            <!-- ---- USERS SECTION ---- -->
+            <!-- 16-18. USERS SECTION -->
             <div id="section-users" class="section">
                 <div class="card">
                     <div class="card-header">
@@ -143,45 +185,54 @@
                 </div>
             </div>
 
-            <!-- ---- SETTINGS SECTION ---- -->
+            <!-- 19. SETTINGS SECTION -->
             <div id="section-settings" class="section">
                 <div class="card">
                     <div class="card-header">
-                        <h3>⚙️ Shop Settings</h3>
+                        <h3>Shop Settings</h3>
                     </div>
                     <form id="settings-form" onsubmit="saveSettings(event)">
                         <div class="form-group">
                             <label>Shop Name</label>
-                            <input type="text" class="form-control" id="set-shop-name" placeholder="My Awesome Shop">
+                            <input type="text" class="form-control" id="set-shop-name">
                         </div>
                         <div class="form-group">
                             <label>Contact Email</label>
-                            <input type="email" class="form-control" id="set-shop-email" placeholder="shop@example.com">
+                            <input type="email" class="form-control" id="set-shop-email">
                         </div>
                         <div class="form-group">
                             <label>Phone Number</label>
-                            <input type="tel" class="form-control" id="set-shop-phone" placeholder="+855 xxx xxx">
+                            <input type="tel" class="form-control" id="set-shop-phone">
                         </div>
                         <div class="form-group">
                             <label>Address</label>
-                            <textarea class="form-control" id="set-shop-address" rows="3" placeholder="Shop address..."></textarea>
+                            <textarea class="form-control" id="set-shop-address" rows="3"></textarea>
                         </div>
-                        <div class="form-group">
-                            <label>Currency</label>
-                            <select class="form-control" id="set-currency">
-                                <option value="USD">USD ($)</option>
-                                <option value="EUR">EUR (€)</option>
-                                <option value="KHR">KHR (៛)</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">💾 Save Settings</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
                     </form>
+                </div>
+                
+                <!-- 20. Export Data -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Data Export</h3>
+                    </div>
+                    <div class="export-buttons">
+                        <button class="btn btn-outline" onclick="exportData('csv')">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                        <button class="btn btn-outline" onclick="exportData('excel')">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- ===== PRODUCT MODAL ===== -->
+    <!-- PRODUCT MODAL -->
     <div id="product-modal" class="modal-overlay">
         <div class="modal-box">
             <span class="modal-close" onclick="closeModal('product-modal')">&times;</span>
@@ -209,13 +260,23 @@
                     <input type="hidden" id="prod-image-url">
                     <div id="product-image-preview"></div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%;">💾 Save Product</button>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-save"></i> Save Product
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- ORDER DETAILS MODAL -->
+    <div id="order-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="modal-close" onclick="closeModal('order-modal')">&times;</span>
+            <h2>Order Details</h2>
+            <div id="order-details-content"></div>
+        </div>
+    </div>
+
     <script src="./api.js"></script>
     <script src="./function/script.js"></script>
 </body>
-</html>
+                                                    </html>
