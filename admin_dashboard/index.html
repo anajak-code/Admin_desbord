@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnajakCode Admin</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="theme/style.css">
+    <link rel="stylesheet" href="theme/chart.css">
+</head>
+<body>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">A</div>
+            <span class="sidebar-brand">AnajakCode</span>
+        </div>
+        <nav class="sidebar-menu">
+            <div class="menu-label">ម៉ឺនុយសំខាន់</div>
+            <ul>
+                <li class="menu-item"><a class="menu-link active" data-section="dashboard"><i class="fas fa-th-large"></i><span class="menu-text">ផ្ទាំងគរប់គ្រង</span></a></li>
+                <li class="menu-item"><a class="menu-link" data-section="products"><i class="fas fa-box"></i><span class="menu-text">ផលិតផល</span></a></li>
+                <li class="menu-item"><a class="menu-link" data-section="orders"><i class="fas fa-shopping-cart"></i><span class="menu-text">ការបញ្ជាទិញ</span><span class="menu-badge" id="pending-orders-badge">0</span></a></li>
+                <li class="menu-item"><a class="menu-link" data-section="users"><i class="fas fa-users"></i><span class="menu-text">អ្នកប្រើប្ាស់</span></a></li>
+            </ul>
+            <div class="menu-label">គ្រប់គ្រង</div>
+            <ul>
+                <li class="menu-item"><a class="menu-link" data-section="discounts"><i class="fas fa-tags"></i><span class="menu-text">កូដបញ្ចុះតម្លៃ</span></a></li>
+                <li class="menu-item"><a class="menu-link" data-section="stock"><i class="fas fa-warehouse"></i><span class="menu-text">គ្រប់គ្រងស្តុក</span></a></li>
+                <li class="menu-item"><a class="menu-link" data-section="settings"><i class="fas fa-cog"></i><span class="menu-text">ការកំណត់</span></a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar">A</div>
+                <div class="sidebar-user-info">
+                    <div class="sidebar-user-name">Admin</div>
+                    <div class="sidebar-user-role">Super Admin</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="toggle-sidebar" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="ស្វែងរក..."></div>
+            </div>
+            <div class="topbar-right">
+                <button class="topbar-btn theme-toggle" id="themeToggle"><i class="fas fa-moon"></i><i class="fas fa-sun"></i></button>
+                <button class="topbar-btn" onclick="showInventoryAlerts()"><i class="fas fa-bell"></i><span class="badge" id="notif-badge">0</span></button>
+                <button class="topbar-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </header>
+
+        <div class="dashboard">
+            <!-- DASHBOARD SECTION -->
+            <div class="section active" id="section-dashboard">
+                <div class="dashboard-header"><h1>👋 សួស្ដី, Admin!</h1><p>ទិដ្ឋភាពទូទៅនៃប្រព័ន្។</p></div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-blue"><i class="fas fa-dollar-sign"></i></div></div><div class="stat-value" id="stat-revenue">$0</div><div class="stat-label">ចំណូលសរុប</div></div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-green"><i class="fas fa-shopping-bag"></i></div></div><div class="stat-value" id="stat-orders">0</div><div class="stat-label">ការបញ្ជាទិញ</div></div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-orange"><i class="fas fa-box"></i></div></div><div class="stat-value" id="stat-products">0</div><div class="stat-label">ផលិតផលសរុប</div></div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-red"><i class="fas fa-users"></i></div></div><div class="stat-value" id="stat-users">0</div><div class="stat-label">អ្នកប្រើបរាស់</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title"><span class="live-dot"></span> Real-Time Monitoring</h3><span id="lastUpdate">Updated just now</span></div>
+                    <div class="card-body">
+                        <div class="realtime-grid">
+                            <div class="realtime-card"><div class="realtime-icon" style="background:rgba(245,158,11,0.1); color:var(--warning);"><i class="fas fa-clock"></i></div><div><div class="realtime-value" id="rt-active">0</div><div class="realtime-label">Pending Orders</div></div></div>
+                            <div class="realtime-card"><div class="realtime-icon" style="background:rgba(16,185,129,0.1); color:var(--success);"><i class="fas fa-user-plus"></i></div><div><div class="realtime-value" id="rt-new-users">0</div><div class="realtime-label">New Users Today</div></div></div>
+                            <div class="realtime-card"><div class="realtime-icon" style="background:rgba(99,102,241,0.1); color:var(--primary);"><i class="fas fa-shopping-cart"></i></div><div><div class="realtime-value" id="rt-new-orders">0</div><div class="realtime-label">Orders Today</div></div></div>
+                            <div class="realtime-card"><div class="realtime-icon" style="background:rgba(239,68,68,0.1); color:var(--danger);"><i class="fas fa-exclamation-triangle"></i></div><div><div class="realtime-value" id="rt-low-stock">0</div><div class="realtime-label">Low Stock Items</div></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">📈 ទិដ្ភាពទូទៅនៃចំណូល</h3><button class="btn btn-primary btn-sm" onclick="refreshChart()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+                    <div class="card-body"><div class="chart-container"><canvas id="revenueChart"></canvas></div></div>
+                </div>
+            </div>
+
+            <!-- PRODUCTS SECTION -->
+            <div class="section hidden" id="section-products">
+                <div class="dashboard-header"><h1>📦 គ្រប់គរងផលិតផល</h1></div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">បញ្ជីផលិតផល</h3><button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> បន្ថែម</button></div>
+                    <div class="card-body"><div class="table-wrapper"><table><thead><tr><th>រូបភាព</th><th>ឈ្មោះ</th><th>តម្លៃ</th><th>ស្តុក</th><th>ប្រភេទ</th><th>សកម្ភាព</th></tr></thead><tbody id="product-table-body"></tbody></table></div></div>
+                </div>
+            </div>
+
+            <!-- ORDERS SECTION -->
+            <div class="section hidden" id="section-orders">
+                <div class="dashboard-header"><h1>🛒 ការបញ្ជាទិញ</h1></div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">បញ្ីការបញ្ជាទិញ</h3></div>
+                    <div class="card-body"><div class="table-wrapper"><table><thead><tr><th>លេខ</th><th>អតិថិជន</th><th>ទឹកប្រាក់</th><th>ស្ថានភាព</th><th>កាលបរិចឆេទ</th><th>សកម្មភាព</th></tr></thead><tbody id="order-table-body"></tbody></table></div></div>
+                </div>
+            </div>
+
+            <!-- USERS SECTION -->
+            <div class="section hidden" id="section-users">
+                <div class="dashboard-header"><h1>👥 អ្នកប្ើប្រាស់</h1></div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">បញ្ជីអ្នកប្រើប្រាស់</h3></div>
+                    <div class="card-body"><div class="table-wrapper"><table><thead><tr><th>អ្នកប្រើ</th><th>អ៊ីមែល</th><th>តួនាទី</th><th>សថានភាព</th><th>សកម្មភាព</th></tr></thead><tbody id="user-table-body"></tbody></table></div></div>
+                </div>
+            </div>
+
+            <!-- DISCOUNTS SECTION -->
+            <div class="section hidden" id="section-discounts">
+                <div class="dashboard-header"><h1>🏷️ កូដបញ្ចុះតម្លៃ</h1></div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">បញ្ជីកូដ</h3><button class="btn btn-primary" onclick="openDiscountModal()"><i class="fas fa-plus"></i> បង្កើត</button></div>
+                    <div class="card-body"><div class="table-wrapper"><table><thead><tr><th>កូដ</th><th>ការពិពណ៌នា</th><th>បញ្ចុះ</th><th>ការប្រើប្ាស់</th><th>ស្ថានភាព</th><th>សកម្មភាព</th></tr></thead><tbody id="discount-table-body"></tbody></table></div></div>
+                </div>
+            </div>
+
+            <!-- STOCK SECTION -->
+            <div class="section hidden" id="section-stock">
+                <div class="dashboard-header"><h1>📦 គ្រប់គ្ងស្តុក</h1></div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-blue"><i class="fas fa-box"></i></div></div><div class="stat-value" id="stock-total">0</div><div class="stat-label">ផលិតផលសរុប</div></div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-red"><i class="fas fa-exclamation-triangle"></i></div></div><div class="stat-value" id="stock-low">0</div><div class="stat-label">ស្តុកទាប</div></div>
+                    <div class="stat-card"><div class="stat-card-header"><div class="stat-icon icon-green"><i class="fas fa-check-circle"></i></div></div><div class="stat-value" id="stock-ok">0</div><div class="stat-label">ស្តុកគ្រប់គ្រាន់</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">បញ្ីផលិតផល</h3></div>
+                    <div class="card-body"><div class="table-wrapper"><table><thead><tr><th>ផលិតផល</th><th>SKU</th><th>ស្តុកបច្ចុប្បន្</th><th>ស្តុកអប្បបរមា</th><th>សកម្មភាព</th></tr></thead><tbody id="stock-table-body"></tbody></table></div></div>
+                </div>
+            </div>
+
+            <!-- SETTINGS SECTION -->
+            <div class="section hidden" id="section-settings">
+                <div class="dashboard-header"><h1>⚙️ ការកំណត់</h1></div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">ព័ត៌មានហាង</h3></div>
+                    <div class="card-body">
+                        <div class="form-group"><label>ឈ្មោះហាង</label><input type="text" id="setting-store-name" class="form-control"></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>អ៊ីមែល</label><input type="email" id="setting-email" class="form-control"></div>
+                            <div class="form-group"><label>ទូរសព្ទ</label><input type="text" id="setting-phone" class="form-control"></div>
+                        </div>
+                        <div class="form-group"><label>អាសយដឋាន</label><textarea id="setting-address" class="form-control"></textarea></div>
+                        <button class="btn btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> រក្សាទុក</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title" id="productModalTitle">បន្ថែមផលិតផល</h3><button class="modal-close" onclick="closeProductModal()"><i class="fas fa-times"></i></button></div>
+            <form id="productForm" onsubmit="handleProductSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="prodId">
+                    <div class="form-group"><label>្មោះ *</label><input type="text" id="prodName" class="form-control" required></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>តម្លៃ ($) *</label><input type="number" step="0.01" id="prodPrice" class="form-control" required></div>
+                        <div class="form-group"><label>តម្លៃដើম ($)</label><input type="number" step="0.01" id="prodCost" class="form-control" value="0"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>ស្ុក *</label><input type="number" id="prodStock" class="form-control" required value="0"></div>
+                        <div class="form-group"><label>ស្តុកអបបបរមា</label><input type="number" id="prodMinStock" class="form-control" value="5"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>ប្រភេទ</label><input type="text" id="prodCategory" class="form-control"></div>
+                        <div class="form-group"><label>SKU</label><input type="text" id="prodSku" class="form-control"></div>
+                    </div>
+                    <div class="form-group"><label>រូបភាព</label><input type="file" id="prodImage" class="form-control" accept="image/*"></div>
+                    <div class="form-group"><label>ការពិពណនា</label><textarea id="prodDesc" class="form-control" rows="3"></textarea></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeProductModal()">បោះបង់</button><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> រក្សាទុក</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="discountModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">បង្កើតកូដ</h3><button class="modal-close" onclick="closeDiscountModal()"><i class="fas fa-times"></i></button></div>
+            <form id="discountForm" onsubmit="handleDiscountSubmit(event)">
+                <div class="modal-body">
+                    <div class="form-group"><label>កូដ *</label><input type="text" id="discCode" class="form-control" required style="text-transform:uppercase;"></div>
+                    <div class="form-group"><label>ការពិពណ៌នា</label><input type="text" id="discDesc" class="form-control"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>ភាគរយ (%) *</label><input type="number" id="discPercent" class="form-control" required min="1" max="100" value="10"></div>
+                        <div class="form-group"><label>ការទិញអប្បបរមា ($)</label><input type="number" id="discMinPurchase" class="form-control" value="0"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>បញ្ចុះអតិបរមា ($)</label><input type="number" id="discMaxDiscount" class="form-control" value="999999"></div>
+                        <div class="form-group"><label>កម្រិតប្រើ</label><select id="discLimitType" class="form-control" onchange="toggleDiscLimit()"><option value="unlimited">គ្មានកំណត់</option><option value="fixed">កំណត់</option></select></div>
+                    </div>
+                    <div class="form-group hidden" id="discLimitGroup"><label>ចំនួនដង</label><input type="number" id="discLimit" class="form-control" value="100"></div>
+                    <div class="form-group"><label>ផុតកំណត់</label><select id="discExpiryType" class="form-control" onchange="toggleDiscExpiry()"><option value="unlimited">គ្មានកំណត់</option><option value="days">ថ្ងៃ</option><option value="months">ខែ</option><option value="years">ឆ្នាំ</option></select></div>
+                    <div class="form-group hidden" id="discExpiryGroup"><label>ចំនួន</label><input type="number" id="discExpiryValue" class="form-control" value="30"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeDiscountModal()">បោះបង់</button><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> បង្កើត</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="stockModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">កែសម្រួលស្តុក</h3><button class="modal-close" onclick="closeStockModal()"><i class="fas fa-times"></i></button></div>
+            <form id="stockForm" onsubmit="handleStockSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="stockProductId">
+                    <div class="form-group"><label>ផលិតផល</label><input type="text" id="stockProductName" class="form-control" readonly></div>
+                    <div class="form-group"><label>ស្ុកបច្ចុប្ន្ន</label><input type="number" id="stockCurrent" class="form-control" readonly></div>
+                    <div class="form-group"><label>ប្រភេទចលនา *</label><select id="stockType" class="form-control" required><option value="purchase">ទិញចូល (+)</option><option value="sale">លក់ចេញ (-)</option><option value="return">ត្រប់ (+)</option><option value="adjustment">កែតម្រូវ</option></select></div>
+                    <div class="form-group"><label>ចំនួន *</label><input type="number" id="stockQuantity" class="form-control" required min="1" value="1"></div>
+                    <div class="form-group"><label>ចំណាំ</label><textarea id="stockNotes" class="form-control" rows="2"></textarea></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeStockModal()">បោះបង់</button><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> រក្សាទុក</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="banModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title" id="banModalTitle">Ban User</h3><button class="modal-close" onclick="closeBanModal()"><i class="fas fa-times"></i></button></div>
+            <form id="banForm" onsubmit="handleBanSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="banUserId"><input type="hidden" id="banAction">
+                    <div class="form-group" id="banReasonGroup"><label>មូលហេតុ</label><textarea id="banReason" class="form-control" rows="3"></textarea></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeBanModal()">បោះបង់</button><button type="submit" class="btn btn-danger" id="banSubmitBtn"><i class="fas fa-ban"></i> Ban</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="inventoryModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title"><i class="fas fa-box-open" style="color:var(--warning);"></i> Inventory Alerts</h3><button class="modal-close" onclick="closeInventoryModal()"><i class="fas fa-times"></i></button></div>
+            <div class="modal-body" id="inventory-list"></div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeInventoryModal()">Close</button></div>
+        </div>
+    </div>
+
+    <div id="invoice-print" style="display:none;">
+        <div style="padding:20px; font-family:Arial, sans-serif;">
+            <div style="text-align:center; margin-bottom:30px;"><h1 style="color:#6366f1;">AnajakCode Shop</h1><p>Invoice</p></div>
+            <div id="invoice-content"></div>
+        </div>
+    </div>
+
+    <div class="shortcut-hint"><kbd>Ctrl+K</kbd> Search &nbsp; <kbd>Ctrl+N</kbd> New Product &nbsp; <kbd>Esc</kbd> Close &nbsp; <kbd>Alt+D</kbd> Dashboard</div>
+
+    <!-- JS Files -->
+    <script src="api.js"></script>
+    <script src="function/script.js"></script>
+    <script src="function/real_data.js"></script>
+</body>
+</html>
