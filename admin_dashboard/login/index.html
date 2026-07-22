@@ -1,72 +1,160 @@
 <!DOCTYPE html>
-<html lang="km">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | AnajakCode</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="../theme/style.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%); padding: 20px; }
-        .box { background: white; border-radius: 24px; width: 100%; max-width: 420px; box-shadow: 0 25px 60px rgba(0,0,0,0.3); overflow: hidden; animation: up 0.5s ease; }
-        @keyframes up { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
-        .head { text-align: center; padding: 36px 24px 20px; }
-        .logo { width: 70px; height: 70px; margin: 0 auto 16px; background: linear-gradient(135deg, #6366f1, #ec4899); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; box-shadow: 0 10px 25px rgba(99,102,241,0.4); }
-        h1 { font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
-        .sub { color: #64748b; font-size: 14px; }
-        .form { padding: 24px; }
-        .fg { margin-bottom: 16px; }
-        .fg label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #334155; }
-        .fg input { width: 100%; padding: 13px 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; transition: all 0.3s; background: #f8fafc; }
-        .fg input:focus { outline: none; border-color: #6366f1; background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.3s; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(99,102,241,0.4); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .msg { text-align: center; margin-top: 12px; font-size: 13px; font-weight: 600; min-height: 18px; }
-        .msg.err { color: #ef4444; } .msg.ok { color: #10b981; }
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .login-container {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 50px 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+        .login-container h1 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .login-container p.subtitle {
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            margin-bottom: 35px;
+            font-size: 14px;
+        }
+        .login-container .form-group label {
+            color: rgba(255,255,255,0.8);
+        }
+        .login-container input {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #fff;
+            padding: 14px 16px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        .login-container input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79,172,254,0.2);
+        }
+        .login-container input::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(79,172,254,0.3);
+        }
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .error-msg {
+            color: #ff6b6b;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+        .logo-icon {
+            text-align: center;
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <div class="head">
-            <div class="logo"><i class="fas fa-bolt"></i></div>
-            <h1>AnajakCode</h1>
-            <p class="sub">សូមស្វាគមន៍! ចូលប្ើគណនីរបស់អ្នក</p>
-        </div>
-        <form class="form" id="loginForm" onsubmit="doLogin(event)">
-            <div class="fg"><label>អ៊ីមែល</label><input type="email" id="liEmail" required placeholder="you@example.com"></div>
-            <div class="fg"><label>ពាក្យសម្ងាត់</label><input type="password" id="liPass" required placeholder="••••••••"></div>
-            <button type="submit" class="btn" id="liBtn">ចូលប្រើ</button>
-            <div class="msg" id="liMsg"></div>
+    <div class="login-container">
+        <div class="logo-icon">🔐</div>
+        <h1>Admin Panel</h1>
+        <p class="subtitle">Sign in to manage your shop</p>
+        
+        <form id="login-form">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="login-email" placeholder="admin@shop.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-login" id="btn-login">Sign In</button>
+            <p class="error-msg" id="error-msg"></p>
         </form>
     </div>
+
     <script src="../api.js"></script>
     <script>
-        async function doLogin(e) {
+        // Check if already logged in
+        if (localStorage.getItem('admin_token')) {
+            window.location.href = '../index.html';
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('liBtn');
-            const msg = document.getElementById('liMsg');
-            btn.disabled = true; btn.innerText = 'កំពុងចូល...'; msg.innerText = '';
+            const btn = document.getElementById('btn-login');
+            const errorEl = document.getElementById('error-msg');
+            
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+            errorEl.style.display = 'none';
+
             try {
-                const res = await fetch(`${API_URL}/admin/login`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: document.getElementById('liPass').value })
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                const res = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
                 });
+
                 const data = await res.json();
-                if (res.ok) {
-                    localStorage.setItem('admin_token', data.token);
-                    msg.className = 'msg ok'; msg.innerText = '✅ ចូលប្រើជោគជ័យ!';
-                    setTimeout(() => window.location.href = '../index.html', 800);
+
+                if (res.ok && data.user) {
+                    localStorage.setItem('admin_token', JSON.stringify(data.user));
+                    localStorage.setItem('admin_logged_in', 'true');
+                    window.location.href = '../index.html';
                 } else {
-                    msg.className = 'msg err'; msg.innerText = '❌ ' + (data.error || 'ពាក្យសម្ងាត់មិនត្រូវ');
-                    btn.disabled = false; btn.innerText = 'ចូលប្រើ';
+                    throw new Error(data.error || 'Invalid credentials');
                 }
             } catch (err) {
-                msg.className = 'msg err'; msg.innerText = '❌ មានបញ្ហាភ្ជាប់';
-                btn.disabled = false; btn.innerText = 'ចូលប្រើ';
+                errorEl.textContent = err.message || 'Connection failed. Check server.';
+                errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
             }
-        }
+        });
     </script>
 </body>
 </html>
