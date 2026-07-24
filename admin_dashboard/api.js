@@ -20,20 +20,32 @@ const API = {
     getProduct: (id) => fetch(`${API_BASE}/api/products/${id}`).then(r => r.json()),
     
     addProduct: (data) => fetch(`${API_BASE}/api/admin/products`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), credentials: 'include'
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(data), 
+        credentials: 'include'
     }).then(r => r.json()),
     
     updateProduct: (id, data) => fetch(`${API_BASE}/api/admin/products/${id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), credentials: 'include'
+        method: 'PUT', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(data), 
+        credentials: 'include'
     }).then(r => r.json()),
     
     deleteProduct: (id) => fetch(`${API_BASE}/api/admin/products/${id}`, {
-        method: 'DELETE', credentials: 'include'
+        method: 'DELETE', 
+        credentials: 'include'
     }).then(r => r.json()),
     
     uploadFile: (file) => {
-        const fd = new FormData(); fd.append('file', file);
-        return fetch(`${API_BASE}/api/admin/upload`, { method: 'POST', body: fd, credentials: 'include' }).then(r => r.json());
+        const fd = new FormData(); 
+        fd.append('file', file);
+        return fetch(`${API_BASE}/api/admin/upload`, { 
+            method: 'POST', 
+            body: fd, 
+            credentials: 'include' 
+        }).then(r => r.json());
     },
     
     getUsers: () => fetch(`${API_BASE}/api/admin/users`, { credentials: 'include' }).then(r => r.json()),
@@ -46,6 +58,9 @@ const API = {
     
     getDiscounts: () => fetch(`${API_BASE}/api/admin/discounts`, { credentials: 'include' }).then(r => r.json()),
     addDiscount: (data) => fetch(`${API_BASE}/api/admin/discounts`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), credentials: 'include'
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(data), 
+        credentials: 'include'
     }).then(r => r.json())
 };
