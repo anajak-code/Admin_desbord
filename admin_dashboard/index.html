@@ -21,14 +21,17 @@
         </div>
         <ul class="nav-menu">
             <li class="nav-item active" data-section="overview"><i class="fas fa-chart-pie"></i> Overview</li>
-            <li class="nav-item" data-section="products"><i class="fas fa-cube"></i> Products</li>
+            <li class="nav-item" data-section="products"><i class="fas fa-cube"></i> Plugins</li>
             <li class="nav-item" data-section="orders"><i class="fas fa-shopping-cart"></i> Orders</li>
             <li class="nav-item" data-section="users"><i class="fas fa-users"></i> Users</li>
-            <li class="nav-item" data-section="tickets"><i class="fas fa-headset"></i> Tickets</li>
+            <li class="nav-item" data-section="tickets"><i class="fas fa-headset"></i> Support</li>
             <li class="nav-item" data-section="discounts"><i class="fas fa-tags"></i> Discounts</li>
             <li class="nav-item" data-section="settings"><i class="fas fa-cog"></i> Settings</li>
-            <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Log Out </button>
         </ul>
+        <div class="sidebar-footer">
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Log Out
+            </button>
         </div>
     </aside>
     
@@ -36,7 +39,7 @@
     <main class="main-content">
         <div class="page-header">
             <h1 id="page-title">Overview</h1>
-            <p> Dashboard</p>
+            <p>Welcome to MineAdmin Dashboard</p>
         </div>
         
         <!-- Overview Section -->
@@ -160,12 +163,12 @@
                     <label>Price Type *</label>
                     <select class="form-control" id="price-type" onchange="togglePriceInput()">
                         <option value="free"> Free</option>
-                        <option value="buy"> Paid</option>
+                        <option value="buy"> paid</option>
                     </select>
                 </div>
 
                 <div class="form-group" id="price-input-group" style="display: none;">
-                    <label>Price </label>
+                    <label>Price ($) *</label>
                     <input type="number" class="form-control" id="prod-price" min="0.01" max="50" step="0.01" placeholder="0.01 - 50.00">
                     <small style="color: var(--text-muted); font-size: 11px;">Allowed range: $0.01 - $50.00</small>
                 </div>
@@ -174,7 +177,7 @@
                 <div class="form-group">
                     <label>Stock Type *</label>
                     <select class="form-control" id="stock-type" onchange="toggleStockInput()">
-                        <option value="unlimited">No stock</option>
+                        <option value="unlimited">♾ Unlimited</option>
                         <option value="amount"> Limited Amount</option>
                     </select>
                 </div>
@@ -196,7 +199,7 @@
 
                 <!-- 5. Image Upload -->
                 <div class="form-group">
-                    <label>Product Image </label>
+                    <label>Product Image *</label>
                     <div class="upload-area" id="image-upload-area" onclick="document.getElementById('prod-image-file').click()">
                         <i class="fas fa-cloud-upload-alt" style="font-size: 32px; color: var(--primary);"></i>
                         <p>Click to upload image</p>
@@ -230,7 +233,7 @@
                     </div>
                     <input type="hidden" id="prod-file-url">
                     <small style="color: var(--danger); font-size: 11px; display: block; margin-top: 4px;">
-                         File will be auto-deleted when stock reaches 0
+                        ⚠️ File will be auto-deleted when stock reaches 0
                     </small>
                 </div>
 
