@@ -20,32 +20,16 @@
             <h2>AnajakCode</h2>
         </div>
         <ul class="nav-menu">
-            <li class="nav-item active" data-section="overview">
-                <i class="fas fa-chart-pie"></i> Overview
-            </li>
-            <li class="nav-item" data-section="products">
-                <i class="fas fa-cube"></i> Plugins
-            </li>
-            <li class="nav-item" data-section="orders">
-                <i class="fas fa-shopping-cart"></i> Orders
-            </li>
-            <li class="nav-item" data-section="users">
-                <i class="fas fa-users"></i> Users
-            </li>
-            <li class="nav-item" data-section="tickets">
-                <i class="fas fa-headset"></i> Support
-            </li>
-            <li class="nav-item" data-section="discounts">
-                <i class="fas fa-tags"></i> Discounts
-            </li>
-            <li class="nav-item" data-section="settings">
-                <i class="fas fa-cog"></i> Settings
-            </li>
+            <li class="nav-item active" data-section="overview"><i class="fas fa-chart-pie"></i> Overview</li>
+            <li class="nav-item" data-section="products"><i class="fas fa-cube"></i> Plugins</li>
+            <li class="nav-item" data-section="orders"><i class="fas fa-shopping-cart"></i> Orders</li>
+            <li class="nav-item" data-section="users"><i class="fas fa-users"></i> Users</li>
+            <li class="nav-item" data-section="tickets"><i class="fas fa-headset"></i> Support</li>
+            <li class="nav-item" data-section="discounts"><i class="fas fa-tags"></i> Discounts</li>
+            <li class="nav-item" data-section="settings"><i class="fas fa-cog"></i> Settings</li>
         </ul>
         <div class="sidebar-footer">
-            <button class="btn-logout" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Log Out
-            </button>
+            <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
         </div>
     </aside>
     
@@ -61,22 +45,14 @@
             <div id="stats-grid" class="stats-grid">
                 <div class="loading"><div class="spinner"></div>Loading stats...</div>
             </div>
-            
             <div class="dashboard-widgets">
                 <div class="card chart-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-chart-line"></i> Revenue Analytics</h3>
-                    </div>
+                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Revenue Analytics</h3></div>
                     <canvas id="revenueChart"></canvas>
                 </div>
-                
                 <div class="card recent-orders-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-clock"></i> Recent Sales</h3>
-                    </div>
-                    <div id="recent-orders-list">
-                        <div class="loading"><div class="spinner"></div></div>
-                    </div>
+                    <div class="card-header"><h3><i class="fas fa-clock"></i> Recent Sales</h3></div>
+                    <div id="recent-orders-list"><div class="loading"><div class="spinner"></div></div></div>
                 </div>
             </div>
         </div>
@@ -86,25 +62,12 @@
             <div class="card">
                 <div class="card-header">
                     <h3>All Plugins</h3>
-                    <button class="btn btn-primary" onclick="openProductModal()">
-                        <i class="fas fa-plus"></i> Add Plugin
-                    </button>
+                    <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Add Plugin</button>
                 </div>
                 <div class="table-wrapper">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Plugin</th>
-                                <th>Price</th>
-                                <th>Stock</th>
-                                <th>Sales</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="products-tbody">
-                            <tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>
-                        </tbody>
+                        <thead><tr><th>ID</th><th>Plugin</th><th>Price</th><th>Stock</th><th>Sales</th><th>Actions</th></tr></thead>
+                        <tbody id="products-tbody"><tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -113,24 +76,11 @@
         <!-- Orders Section -->
         <div id="section-orders" class="section">
             <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-shopping-cart"></i> Customer Orders</h3>
-                </div>
+                <div class="card-header"><h3><i class="fas fa-shopping-cart"></i> Customer Orders</h3></div>
                 <div class="table-wrapper">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orders-tbody">
-                            <tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>
-                        </tbody>
+                        <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+                        <tbody id="orders-tbody"><tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -139,23 +89,11 @@
         <!-- Users Section -->
         <div id="section-users" class="section">
             <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-users"></i> User Management</h3>
-                </div>
+                <div class="card-header"><h3><i class="fas fa-users"></i> User Management</h3></div>
                 <div class="table-wrapper">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-tbody">
-                            <tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr>
-                        </tbody>
+                        <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="users-tbody"><tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -164,24 +102,11 @@
         <!-- Tickets Section -->
         <div id="section-tickets" class="section">
             <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-headset"></i> Support Tickets</h3>
-                </div>
+                <div class="card-header"><h3><i class="fas fa-headset"></i> Support Tickets</h3></div>
                 <div class="table-wrapper">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>User</th>
-                                <th>Subject</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tickets-tbody">
-                            <tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>
-                        </tbody>
+                        <thead><tr><th>ID</th><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+                        <tbody id="tickets-tbody"><tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -192,25 +117,12 @@
             <div class="card">
                 <div class="card-header">
                     <h3><i class="fas fa-tags"></i> Discount Codes</h3>
-                    <button class="btn btn-primary" onclick="openDiscountModal()">
-                        <i class="fas fa-plus"></i> Create Code
-                    </button>
+                    <button class="btn btn-primary" onclick="openDiscountModal()"><i class="fas fa-plus"></i> Create Code</button>
                 </div>
                 <div class="table-wrapper">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Code</th>
-                                <th>Discount</th>
-                                <th>Used</th>
-                                <th>Max Uses</th>
-                                <th>Expires</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="discounts-tbody">
-                            <tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>
-                        </tbody>
+                        <thead><tr><th>Code</th><th>Discount</th><th>Used</th><th>Max Uses</th><th>Expires</th><th>Actions</th></tr></thead>
+                        <tbody id="discounts-tbody"><tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -219,29 +131,13 @@
         <!-- Settings Section -->
         <div id="section-settings" class="section">
             <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-store"></i> Shop Settings</h3>
-                </div>
+                <div class="card-header"><h3><i class="fas fa-store"></i> Shop Settings</h3></div>
                 <form id="settings-form" onsubmit="saveSettings(event)">
-                    <div class="form-group">
-                        <label>Shop Name</label>
-                        <input type="text" class="form-control" id="set-shop-name">
-                    </div>
-                    <div class="form-group">
-                        <label>Contact Email</label>
-                        <input type="email" class="form-control" id="set-shop-email">
-                    </div>
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="tel" class="form-control" id="set-shop-phone">
-                    </div>
-                    <div class="form-group">
-                        <label>Address</label>
-                        <textarea class="form-control" id="set-shop-address" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Settings
-                    </button>
+                    <div class="form-group"><label>Shop Name</label><input type="text" class="form-control" id="set-shop-name"></div>
+                    <div class="form-group"><label>Contact Email</label><input type="email" class="form-control" id="set-shop-email"></div>
+                    <div class="form-group"><label>Phone Number</label><input type="tel" class="form-control" id="set-shop-phone"></div>
+                    <div class="form-group"><label>Address</label><textarea class="form-control" id="set-shop-address" rows="3"></textarea></div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Settings</button>
                 </form>
             </div>
         </div>
@@ -253,35 +149,15 @@
             <span class="modal-close" onclick="closeModal('product-modal')">&times;</span>
             <h2 id="modal-product-title">Add New Plugin</h2>
             <form id="product-form" onsubmit="saveProduct(event)">
-                <div class="form-group">
-                    <label>Plugin Name *</label>
-                    <input type="text" class="form-control" id="prod-name" required>
+                <div class="form-group"><label>Plugin Name *</label><input type="text" class="form-control" id="prod-name" required></div>
+                <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group"><label>Price ($) *</label><input type="number" class="form-control" id="prod-price" step="0.01" required></div>
+                    <div class="form-group"><label>Stock</label><input type="number" class="form-control" id="prod-stock" value="0"></div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Price ($) *</label>
-                        <input type="number" class="form-control" id="prod-price" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Stock</label>
-                        <input type="number" class="form-control" id="prod-stock" value="0">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea class="form-control" id="prod-desc" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Image URL</label>
-                    <input type="text" class="form-control" id="prod-image-url" placeholder="/uploads/...">
-                </div>
-                <div class="form-group">
-                    <label>File URL (.jar)</label>
-                    <input type="text" class="form-control" id="prod-file-url" placeholder="/uploads/...">
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-save"></i> Save Plugin
-                </button>
+                <div class="form-group"><label>Description</label><textarea class="form-control" id="prod-desc" rows="3"></textarea></div>
+                <div class="form-group"><label>Image URL</label><input type="text" class="form-control" id="prod-image-url" placeholder="/uploads/..."></div>
+                <div class="form-group"><label>File URL (.jar)</label><input type="text" class="form-control" id="prod-file-url" placeholder="/uploads/..."></div>
+                <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-save"></i> Save Plugin</button>
             </form>
         </div>
     </div>
@@ -292,25 +168,11 @@
             <span class="modal-close" onclick="closeModal('discount-modal')">&times;</span>
             <h2>Create Discount Code</h2>
             <form id="discount-form" onsubmit="saveDiscount(event)">
-                <div class="form-group">
-                    <label>Code *</label>
-                    <input type="text" class="form-control" id="disc-code" required placeholder="MINECRAFT20">
-                </div>
-                <div class="form-group">
-                    <label>Discount Percent (%) *</label>
-                    <input type="number" class="form-control" id="disc-percent" required min="1" max="100">
-                </div>
-                <div class="form-group">
-                    <label>Max Uses</label>
-                    <input type="number" class="form-control" id="disc-max-uses" value="100">
-                </div>
-                <div class="form-group">
-                    <label>Expires At</label>
-                    <input type="datetime-local" class="form-control" id="disc-expires">
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-save"></i> Create Code
-                </button>
+                <div class="form-group"><label>Code *</label><input type="text" class="form-control" id="disc-code" required placeholder="MINECRAFT20"></div>
+                <div class="form-group"><label>Discount Percent (%) *</label><input type="number" class="form-control" id="disc-percent" required min="1" max="100"></div>
+                <div class="form-group"><label>Max Uses</label><input type="number" class="form-control" id="disc-max-uses" value="100"></div>
+                <div class="form-group"><label>Expires At</label><input type="datetime-local" class="form-control" id="disc-expires"></div>
+                <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-save"></i> Create Code</button>
             </form>
         </div>
     </div>
