@@ -10,9 +10,9 @@ const API = {
         if (!r.ok) { const err = await r.json(); throw new Error(err.error || 'Login failed'); }
         return r.json();
     }),
-
+    
     adminLogout: () => fetch(`${API_BASE}/api/admin/logout`, { method: 'POST', credentials: 'include' }).then(r => r.json()),
-
+    
     getStats: () => fetch(`${API_BASE}/api/admin/stats`, { credentials: 'include' }).then(r => r.json()),
     getOrders: () => fetch(`${API_BASE}/api/admin/orders`, { credentials: 'include' }).then(r => r.json()),
     
@@ -35,15 +35,15 @@ const API = {
         const fd = new FormData(); fd.append('file', file);
         return fetch(`${API_BASE}/api/admin/upload`, { method: 'POST', body: fd, credentials: 'include' }).then(r => r.json());
     },
-
+    
     getUsers: () => fetch(`${API_BASE}/api/admin/users`, { credentials: 'include' }).then(r => r.json()),
     deleteUser: (id) => fetch(`${API_BASE}/api/admin/users/${id}`, { method: 'DELETE', credentials: 'include' }).then(r => r.json()),
     banUser: (id) => fetch(`${API_BASE}/api/admin/users/${id}/ban`, { method: 'PUT', credentials: 'include' }).then(r => r.json()),
     unbanUser: (id) => fetch(`${API_BASE}/api/admin/users/${id}/unban`, { method: 'PUT', credentials: 'include' }).then(r => r.json()),
-
+    
     getTickets: () => fetch(`${API_BASE}/api/admin/tickets`, { credentials: 'include' }).then(r => r.json()),
     closeTicket: (id) => fetch(`${API_BASE}/api/admin/tickets/${id}/close`, { method: 'PUT', credentials: 'include' }).then(r => r.json()),
-
+    
     getDiscounts: () => fetch(`${API_BASE}/api/admin/discounts`, { credentials: 'include' }).then(r => r.json()),
     addDiscount: (data) => fetch(`${API_BASE}/api/admin/discounts`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), credentials: 'include'
