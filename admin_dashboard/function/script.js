@@ -9,54 +9,70 @@ let uploadedFileName = null;
 // ============================================
 const SoundFX = {
     context: null,
+    
     init() {
         if (!this.context) {
             this.context = new (window.AudioContext || window.webkitAudioContext)();
         }
     },
+    
     playSuccess() {
         this.init();
         const ctx = this.context;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
-        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.4);
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        oscillator.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+        oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+        oscillator.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+        
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.4);
     },
+    
     playError() {
         this.init();
         const ctx = this.context;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(200, ctx.currentTime);
-        osc.frequency.setValueAtTime(150, ctx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.3);
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(200, ctx.currentTime);
+        oscillator.frequency.setValueAtTime(150, ctx.currentTime + 0.15);
+        
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.3);
     },
+    
     playInfo() {
         this.init();
         const ctx = this.context;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(440, ctx.currentTime);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.2);
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(440, ctx.currentTime); // A4
+        
+        gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.2);
     }
 };
 
@@ -77,9 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const counter = document.getElementById('char-count');
             if (counter) {
                 counter.textContent = `${count}/500`;
-                if (count >= 500) counter.style.color = 'var(--danger)';
-                else if (count > 450) counter.style.color = 'var(--warning)';
-                else counter.style.color = 'var(--primary)';
+                if (count > 450) {
+                    counter.style.color = 'var(--warning)';
+                } else if (count >= 500) {
+                    counter.style.color = 'var(--danger)';
+                } else {
+                    counter.style.color = 'var(--primary)';
+                }
             }
         });
     }
@@ -108,8 +128,12 @@ function initNavigation() {
 
 function loadSection(section) {
     const loaders = { 
-        overview: loadOverview, products: loadProducts, orders: loadOrders, 
-        users: loadUsers, tickets: loadTickets, discounts: loadDiscounts, 
+        overview: loadOverview, 
+        products: loadProducts, 
+        orders: loadOrders, 
+        users: loadUsers, 
+        tickets: loadTickets, 
+        discounts: loadDiscounts, 
         settings: loadSettings 
     };
     if (loaders[section]) loaders[section]();
@@ -140,7 +164,7 @@ function toggleStockInput() {
     
     if (stockType === 'unlimited') {
         stockGroup.style.display = 'none';
-        stockInput.value = '999999';
+        stockInput.value = '999999'; // Large number for unlimited
         stockInput.removeAttribute('required');
     } else {
         stockGroup.style.display = 'block';
@@ -155,11 +179,13 @@ async function handleImageUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
     
+    // Validate file type
     if (!file.type.startsWith('image/')) {
         showToast('Please select a valid image file', 'error');
         return;
     }
     
+    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
         showToast('Image size must be less than 5MB', 'error');
         return;
@@ -173,6 +199,7 @@ async function handleImageUpload(event) {
             uploadedImageUrl = result.url;
             document.getElementById('prod-image-url').value = result.url;
             
+            // Show preview
             const preview = document.getElementById('image-preview');
             const previewImg = document.getElementById('image-preview-img');
             previewImg.src = API_BASE + result.url;
@@ -192,11 +219,13 @@ async function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
     
+    // Validate file type
     if (!file.name.endsWith('.jar')) {
         showToast('Please select a .jar file', 'error');
         return;
     }
     
+    // Validate file size (50MB)
     if (file.size > 50 * 1024 * 1024) {
         showToast('File size must be less than 50MB', 'error');
         return;
@@ -211,6 +240,7 @@ async function handleFileUpload(event) {
             uploadedFileName = result.filename || file.name;
             document.getElementById('prod-file-url').value = result.url;
             
+            // Show file info
             document.getElementById('file-name').textContent = uploadedFileName;
             document.getElementById('file-info').style.display = 'block';
             document.getElementById('file-upload-area').style.display = 'none';
@@ -250,10 +280,22 @@ async function loadOverview() {
     try {
         const stats = await API.getStats();
         document.getElementById('stats-grid').innerHTML = `
-            <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value">$${stats.total_revenue?.toFixed(2) || '0'}</div></div>
-            <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value">${stats.total_orders || 0}</div></div>
-            <div class="stat-card"><div class="stat-label">Total Plugins</div><div class="stat-value">${stats.total_products || 0}</div></div>
-            <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value">${stats.total_users || 0}</div></div>
+            <div class="stat-card">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value">$${stats.total_revenue?.toFixed(2) || '0'}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-value">${stats.total_orders || 0}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Plugins</div>
+                <div class="stat-value">${stats.total_products || 0}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">${stats.total_users || 0}</div>
+            </div>
         `;
         renderRevenueChart();
         loadRecentOrders();
@@ -294,8 +336,14 @@ async function loadRecentOrders() {
         const orders = (await API.getOrders()).slice(0, 5);
         document.getElementById('recent-orders-list').innerHTML = orders.map(o => `
             <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
-                <div><strong style="color:white;">#${o.id}</strong><br><small style="color:var(--text-muted)">${o.customer_name}</small></div>
-                <div style="text-align:right"><strong style="color:var(--primary);">$${o.total_price.toFixed(2)}</strong><br><span class="badge ${o.status==='completed'?'badge-success':'badge-warning'}">${o.status}</span></div>
+                <div>
+                    <strong style="color:white;">#${o.id}</strong><br>
+                    <small style="color:var(--text-muted)">${o.customer_name}</small>
+                </div>
+                <div style="text-align:right">
+                    <strong style="color:var(--primary);">$${o.total_price.toFixed(2)}</strong><br>
+                    <span class="badge ${o.status==='completed'?'badge-success':o.status==='cancelled'?'badge-danger':'badge-warning'}">${o.status}</span>
+                </div>
             </div>
         `).join('') || '<p class="empty-state">No recent orders</p>';
     } catch (e) {}
@@ -314,11 +362,25 @@ async function loadProducts() {
             return `
                 <tr>
                     <td>#${p.id}</td>
-                    <td><div style="display:flex;align-items:center;gap:10px;"><img src="${p.image_url?API_BASE+p.image_url:''}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'"><span style="font-weight:600;">${p.name}</span></div></td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <img src="${p.image_url?API_BASE+p.image_url:''}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">
+                            <span style="font-weight:600;">${p.name}</span>
+                        </div>
+                    </td>
                     <td>${priceDisplay}</td>
                     <td>${stockDisplay}</td>
                     <td>${p.sales_count || 0}</td>
-                    <td><div style="display:flex;gap:8px;"><button class="btn btn-outline btn-sm" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i></button></div></td>
+                    <td>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-outline btn-sm" onclick="editProduct(${p.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,"\\'")}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             `;
         }).join('') || '<tr><td colspan="6"><p class="empty-state">No products found</p></td></tr>';
@@ -340,6 +402,7 @@ function openProductModal() {
     togglePriceInput();
     toggleStockInput();
     
+    // Reset uploads
     document.getElementById('image-preview').style.display = 'none';
     document.getElementById('image-upload-area').style.display = 'block';
     document.getElementById('file-info').style.display = 'none';
@@ -360,14 +423,17 @@ async function editProduct(id) {
         document.getElementById('prod-stock').value = p.stock;
         document.getElementById('prod-desc').value = p.description || '';
         
+        // Set price type
         const priceType = p.price === 0 ? 'free' : 'buy';
         document.getElementById('price-type').value = priceType;
         togglePriceInput();
         
+        // Set stock type
         const stockType = p.stock >= 999999 ? 'unlimited' : 'amount';
         document.getElementById('stock-type').value = stockType;
         toggleStockInput();
         
+        // Set image
         if (p.image_url) {
             uploadedImageUrl = p.image_url;
             document.getElementById('prod-image-url').value = p.image_url;
@@ -376,6 +442,7 @@ async function editProduct(id) {
             document.getElementById('image-upload-area').style.display = 'none';
         }
         
+        // Set file
         if (p.file_url) {
             uploadedFileUrl = p.file_url;
             uploadedFileName = p.file_url.split('/').pop();
@@ -394,6 +461,7 @@ async function editProduct(id) {
 async function saveProduct(e) {
     e.preventDefault();
     
+    // Validation
     const name = document.getElementById('prod-name').value.trim();
     const priceType = document.getElementById('price-type').value;
     const stockType = document.getElementById('stock-type').value;
@@ -401,8 +469,15 @@ async function saveProduct(e) {
     const imageUrl = document.getElementById('prod-image-url').value;
     const fileUrl = document.getElementById('prod-file-url').value;
     
-    if (!name) { showToast('Product name is required', 'error'); return; }
-    if (description.length < 1 || description.length > 500) { showToast('Description must be 1-500 characters', 'error'); return; }
+    if (!name) {
+        showToast('Product name is required', 'error');
+        return;
+    }
+    
+    if (description.length < 1 || description.length > 500) {
+        showToast('Description must be 1-500 characters', 'error');
+        return;
+    }
     
     let price = 0;
     if (priceType === 'buy') {
@@ -422,8 +497,15 @@ async function saveProduct(e) {
         }
     }
     
-    if (!imageUrl) { showToast('Please upload a product image', 'error'); return; }
-    if (!fileUrl) { showToast('Please upload a .jar file', 'error'); return; }
+    if (!imageUrl) {
+        showToast('Please upload a product image', 'error');
+        return;
+    }
+    
+    if (!fileUrl) {
+        showToast('Please upload a .jar file', 'error');
+        return;
+    }
     
     const data = {
         name: name,
@@ -431,7 +513,9 @@ async function saveProduct(e) {
         stock: stock,
         description: description,
         image_url: imageUrl,
-        file_url: fileUrl
+        file_url: fileUrl,
+        is_free: priceType === 'free',
+        is_unlimited: stockType === 'unlimited'
     };
     
     try {
@@ -469,11 +553,18 @@ async function loadOrders() {
         document.getElementById('orders-tbody').innerHTML = orders.map(o => `
             <tr>
                 <td>#${o.id}</td>
-                <td><strong>${o.customer_name}</strong><br><small style="color:var(--text-muted)">${o.customer_email}</small></td>
+                <td>
+                    <strong>${o.customer_name}</strong><br>
+                    <small style="color:var(--text-muted)">${o.customer_email}</small>
+                </td>
                 <td><strong style="color:var(--primary);">$${o.total_price.toFixed(2)}</strong></td>
                 <td><span class="badge ${o.status==='completed'?'badge-success':o.status==='cancelled'?'badge-danger':'badge-warning'}">${o.status}</span></td>
                 <td>${new Date(o.created_at).toLocaleDateString()}</td>
-                <td><button class="btn btn-outline btn-sm" onclick="alert('Order #${o.id}\\nTotal: $${o.total_price.toFixed(2)}\\nItems: ${o.items.map(i=>i.product_name).join(', ')}')"><i class="fas fa-eye"></i> View</button></td>
+                <td>
+                    <button class="btn btn-outline btn-sm" onclick="alert('Order #${o.id}\\nTotal: $${o.total_price.toFixed(2)}\\nItems: ${o.items.map(i=>i.product_name).join(', ')}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                </td>
             </tr>
         `).join('') || '<tr><td colspan="6"><p class="empty-state">No orders yet</p></td></tr>';
     } catch (e) { 
@@ -489,12 +580,21 @@ async function loadUsers() {
         const users = await API.getUsers();
         document.getElementById('users-tbody').innerHTML = users.map(u => `
             <tr>
-                <td>#${u.id}</td><td><strong>${u.name}</strong></td><td>${u.email}</td>
+                <td>#${u.id}</td>
+                <td><strong>${u.name}</strong></td>
+                <td>${u.email}</td>
                 <td><span class="badge ${u.status==='banned'?'badge-danger':'badge-success'}">${u.status}</span></td>
-                <td><div style="display:flex;gap:8px;">
-                    ${u.status==='banned' ? `<button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})"><i class="fas fa-check"></i> Unban</button>` : `<button class="btn btn-warning btn-sm" onclick="banUser(${u.id})"><i class="fas fa-ban"></i> Ban</button>`}
-                    <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id},'${u.name.replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i></button>
-                </div></td>
+                <td>
+                    <div style="display:flex;gap:8px;">
+                        ${u.status==='banned' ? 
+                            `<button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})"><i class="fas fa-check"></i> Unban</button>` : 
+                            `<button class="btn btn-warning btn-sm" onclick="banUser(${u.id})"><i class="fas fa-ban"></i> Ban</button>`
+                        }
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id},'${u.name.replace(/'/g,"\\'")}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
             </tr>
         `).join('') || '<tr><td colspan="5"><p class="empty-state">No users registered</p></td></tr>';
     } catch (e) { 
@@ -502,9 +602,38 @@ async function loadUsers() {
     }
 }
 
-async function banUser(id) { if (!confirm('Ban this user?')) return; try { await API.banUser(id); showToast('User banned', 'success'); loadUsers(); } catch (e) { showToast('Failed', 'error'); } }
-async function unbanUser(id) { if (!confirm('Unban this user?')) return; try { await API.unbanUser(id); showToast('User unbanned', 'success'); loadUsers(); } catch (e) { showToast('Failed', 'error'); } }
-async function deleteUser(id, name) { if (!confirm(`Delete "${name}" permanently?`)) return; try { await API.deleteUser(id); showToast('User deleted', 'success'); loadUsers(); } catch (e) { showToast('Failed', 'error'); } }
+async function banUser(id) { 
+    if (!confirm('Ban this user?')) return; 
+    try { 
+        await API.banUser(id); 
+        showToast('User banned', 'success'); 
+        loadUsers(); 
+    } catch (e) { 
+        showToast('Failed', 'error'); 
+    } 
+}
+
+async function unbanUser(id) { 
+    if (!confirm('Unban this user?')) return; 
+    try { 
+        await API.unbanUser(id); 
+        showToast('User unbanned', 'success'); 
+        loadUsers(); 
+    } catch (e) { 
+        showToast('Failed', 'error'); 
+    } 
+}
+
+async function deleteUser(id, name) { 
+    if (!confirm(`Delete "${name}" permanently?`)) return; 
+    try { 
+        await API.deleteUser(id); 
+        showToast('User deleted', 'success'); 
+        loadUsers(); 
+    } catch (e) { 
+        showToast('Failed', 'error'); 
+    } 
+}
 
 // ============================================
 // TICKETS
@@ -514,11 +643,19 @@ async function loadTickets() {
         const tickets = await API.getTickets();
         document.getElementById('tickets-tbody').innerHTML = tickets.map(t => `
             <tr>
-                <td>#${t.id}</td><td><strong>${t.name}</strong><br><small style="color:var(--text-muted)">${t.email}</small></td>
+                <td>#${t.id}</td>
+                <td>
+                    <strong>${t.name}</strong><br>
+                    <small style="color:var(--text-muted)">${t.email}</small>
+                </td>
                 <td>${t.subject}</td>
                 <td><span class="badge ${t.status==='open'?'badge-success':t.status==='closed'?'badge-danger':'badge-warning'}">${t.status}</span></td>
                 <td>${new Date(t.date).toLocaleDateString()}</td>
-                <td><button class="btn btn-success btn-sm" onclick="closeTicket(${t.id})"><i class="fas fa-check"></i> Close</button></td>
+                <td>
+                    <button class="btn btn-success btn-sm" onclick="closeTicket(${t.id})">
+                        <i class="fas fa-check"></i> Close
+                    </button>
+                </td>
             </tr>
         `).join('') || '<tr><td colspan="6"><p class="empty-state">No tickets found</p></td></tr>';
     } catch (e) { 
@@ -526,7 +663,16 @@ async function loadTickets() {
     }
 }
 
-async function closeTicket(id) { if (!confirm('Close this ticket?')) return; try { await API.closeTicket(id); showToast('Ticket closed', 'success'); loadTickets(); } catch (e) { showToast('Failed', 'error'); } }
+async function closeTicket(id) { 
+    if (!confirm('Close this ticket?')) return; 
+    try { 
+        await API.closeTicket(id); 
+        showToast('Ticket closed', 'success'); 
+        loadTickets(); 
+    } catch (e) { 
+        showToast('Failed', 'error'); 
+    } 
+}
 
 // ============================================
 // DISCOUNTS
@@ -536,10 +682,16 @@ async function loadDiscounts() {
         const discounts = await API.getDiscounts();
         document.getElementById('discounts-tbody').innerHTML = discounts.map(d => `
             <tr>
-                <td><strong>${d.code}</strong></td><td><span class="badge badge-success">${d.percent}%</span></td>
-                <td>${d.used_count}</td><td>${d.max_uses}</td>
+                <td><strong>${d.code}</strong></td>
+                <td><span class="badge badge-success">${d.percent}%</span></td>
+                <td>${d.used_count}</td>
+                <td>${d.max_uses}</td>
                 <td>${d.expires_at ? new Date(d.expires_at).toLocaleDateString() : 'Never'}</td>
-                <td><button class="btn btn-danger btn-sm" onclick="showToast('Delete not implemented yet', 'info')"><i class="fas fa-trash"></i></button></td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="showToast('Delete not implemented yet', 'info')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
             </tr>
         `).join('') || '<tr><td colspan="6"><p class="empty-state">No discount codes</p></td></tr>';
     } catch (e) { 
@@ -547,7 +699,10 @@ async function loadDiscounts() {
     }
 }
 
-function openDiscountModal() { document.getElementById('discount-form').reset(); document.getElementById('discount-modal').classList.add('show'); }
+function openDiscountModal() { 
+    document.getElementById('discount-form').reset(); 
+    document.getElementById('discount-modal').classList.add('show'); 
+}
 
 async function saveDiscount(e) {
     e.preventDefault();
@@ -592,13 +747,19 @@ function saveSettings(e) {
 // ============================================
 // UTILITIES
 // ============================================
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function closeModal(id) { 
+    document.getElementById(id).classList.remove('show'); 
+}
 
 function showToast(msg, type = 'info') {
     // Play sound effect
-    if (type === 'success') SoundFX.playSuccess();
-    else if (type === 'error') SoundFX.playError();
-    else SoundFX.playInfo();
+    if (type === 'success') {
+        SoundFX.playSuccess();
+    } else if (type === 'error') {
+        SoundFX.playError();
+    } else {
+        SoundFX.playInfo();
+    }
     
     const c = document.getElementById('toast-container');
     const t = document.createElement('div');
@@ -613,7 +774,9 @@ function showToast(msg, type = 'info') {
     }, 3000);
 }
 
-function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('open'); }
+function toggleSidebar() { 
+    document.querySelector('.sidebar').classList.toggle('open'); 
+}
 
 function logout() {
     if(confirm('Log out from Admin Panel?')) {
@@ -624,5 +787,6 @@ function logout() {
 }
 
 document.addEventListener('click', (e) => { 
-    if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('show'); 
+    if(e.target.classList.contains('modal-overlay')) 
+        e.target.classList.remove('show'); 
 });
